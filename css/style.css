@@ -1,0 +1,61 @@
+/* Skip Nav */
+#skipnav {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+#skipnav:focus {
+  top: 0;
+  z-index: 9999;
+  clip: initial;
+  height: auto;
+  width: auto;
+  padding: 0.5em;
+  border: 1px blue dashed;
+  color: #ff8000;
+}
+
+/* Alignment Helpers */
+.center {
+  text-align: center;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+
+/* List helpers */
+.center ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  list-style-type: none;
+}
+.center ul li {
+  padding: 5px;
+  margin: 5px;
+}
+
+/* Banner */
+#banner-container {
+  display: block;
+  text-align: center;
+}
+
+/* Search */
+.search-container.center form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.search-container.center form input[type="text"] {
+  width: 100%;
+}
