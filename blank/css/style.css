@@ -32,6 +32,43 @@
   text-align: right;
 }
 
+article#content {
+  padding: 1em;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Columns */
+.col-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+
+.col-container .col:first-child {
+  padding: 1em 1em 1em 0;
+}
+.col-container .col:last-child {
+  padding: 1em 0 1em 1em;
+}
+
+.col-container.two .col {
+  max-width: 50%;
+}
+
+.col-container.one-two .col:first-child {
+  max-width: 33.3%;
+}
+.col-container.one-two .col:last-child {
+  max-width: 66.66%;
+}
+
+.col img {
+  max-width: 100%;
+}
+
 /* List helpers */
 .center ul {
   display: flex;
