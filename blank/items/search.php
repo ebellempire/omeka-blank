@@ -1,19 +1,16 @@
 <?php
-$pageTitle = __('Search Items');
-echo head(array('title' => $pageTitle,
-           'bodyclass' => 'items advanced-search'));
+$pageTitle = __('Search %s', ob_item_label('plural'));
+echo head(array('title' => $pageTitle,'bodyclass' => 'items advanced-search'));
 ?>
 
-<h1><?php echo $pageTitle; ?></h1>
+<div id="search-title">
+    <h1><?php echo $pageTitle; ?></h1>
+</div>
 
-<nav class="items-nav navigation secondary-nav center">
-    <?php echo public_nav_items(); ?>
-</nav>
+<?php echo ob_secondary_nav(); ?>
 
-<?php echo $this->partial(
-    'items/search-form.php',
-    array('formAttributes' =>
-        array('id' => 'advanced-search-form'))
-); ?>
+<div id="search-form-container">
+    <?php echo $this->partial('items/search-form.php', array('formAttributes' =>array('id' => 'advanced-search-form'))); ?>
+</div>
 
 <?php echo foot(); ?>

@@ -1,61 +1,24 @@
 <?php
-$pageTitle = __('Browse Items');
+$pageTitle = __('Browse %s', ob_item_label('plural'));
 echo head(array('title' => $pageTitle, 'bodyclass' => 'items browse'));
 ?>
 
-<h1><?php echo $pageTitle;?> <?php echo __('(%s total)', $total_results); ?></h1>
-
-<nav class="items-nav navigation secondary-nav center">
-    <?php echo public_nav_items(); ?>
-</nav>
+<!-- Title -->
+<div id="browse-title">
+    <h1><?php echo $pageTitle;?> <?php echo __('(%s total)', $total_results); ?></h1>
+</div>
 
 <?php echo item_search_filters(); ?>
 
-<?php echo pagination_links(); ?>
+<?php echo ob_secondary_nav(); ?>
 
-<?php if ($total_results > 0): ?>
+<?php echo ob_sort_links();?>
 
-<?php
-$sortLinks[__('Title')] = 'Dublin Core,Title';
-$sortLinks[__('Creator')] = 'Dublin Core,Creator';
-$sortLinks[__('Date Added')] = 'added';
-?>
-<div id="sort-links">
-    <span class="sort-label"><?php echo __('Sort by: '); ?>
-    </span>
-    <?php echo browse_sort_links($sortLinks); ?>
+<div id="primary-content">
+    <?php foreach (loop('items') as $item) {
+    echo ob_item_card($item, get_view());
+} ?>
 </div>
-
-<?php endif; ?>
-
-<?php foreach (loop('items') as $item): ?>
-<div class="item hentry">
-    <h2><?php echo link_to_item(null, array('class' => 'permalink')); ?></h2>
-    <div class="item-meta">
-        <?php if (metadata('item', 'has files')): ?>
-        <div class="item-img">
-            <?php echo link_to_item(item_image()); ?>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($description = metadata('item', array('Dublin Core', 'Description'), array('snippet' => 250))): ?>
-        <div class="item-description">
-            <?php echo $description; ?>
-        </div>
-        <?php endif; ?>
-
-        <?php if (metadata('item', 'has tags')): ?>
-        <div class="tags">
-            <p><strong><?php echo __('Tags'); ?>:</strong>
-                <?php echo tag_string('items'); ?></p>
-        </div>
-        <?php endif; ?>
-
-        <?php fire_plugin_hook('public_items_browse_each', array('view' => $this, 'item' => $item)); ?>
-
-    </div><!-- end class="item-meta" -->
-</div><!-- end class="item hentry" -->
-<?php endforeach; ?>
 
 <?php echo pagination_links(); ?>
 

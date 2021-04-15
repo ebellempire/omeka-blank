@@ -1,13 +1,13 @@
 <?php
-$pageTitle = __('Browse Items');
+$pageTitle = __('Browse %s Tags', ob_item_label());
 echo head(array('title' => $pageTitle, 'bodyclass' => 'items tags'));
 ?>
 
-<h1><?php echo $pageTitle; ?></h1>
+<div id="tags-title">
+    <h1><?php echo $pageTitle; ?></h1>
+</div>
 
-<nav class="navigation items-nav secondary-nav center">
-    <?php echo public_nav_items(); ?>
-</nav>
+<?php echo ob_secondary_nav(); ?>
 
 <?php echo tag_cloud($tags, 'items/browse'); ?>
 

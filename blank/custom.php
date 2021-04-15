@@ -95,7 +95,8 @@ function ob_embed_codes($item=null, $html=null)
 // If the URL metadata field is a youtube link, we'll create an embed code and put it at the top
 function ob_item_files($item=null, $gallery=false, $img_index=0, $audio_index=0, $video_index=0, $gallery_html = null, $html=null)
 {
-    $html .= ob_embed_codes($item);
+    $html .= ob_embed_codes($item); // @todo: this should be a theme option!!!
+
     if (metadata($item, 'has files')) {
         foreach (loop('files', $item->Files) as $file) {
             $mime = metadata($file, 'mime_type');
@@ -128,7 +129,7 @@ function ob_item_files($item=null, $gallery=false, $img_index=0, $audio_index=0,
 // preferred label for items
 function ob_item_label($type="singular")
 {
-    if ($type="plural") {
+    if ($type !== "singular") {
         $label = get_theme_option('items_label_p') ? get_theme_option('items_label_p') : __('Items');
     } else {
         $label = get_theme_option('items_label_s') ? get_theme_option('items_label_s') : __('Item');
@@ -153,11 +154,11 @@ function ob_featured_item_label($type="singular")
 function ob_dublin($record=null, $element=null, $fallbacks=array(), $html=null)
 {
     if (element_exists('Dublin Core', $element) && ($el = metadata($record, array('Dublin Core',$element)))) {
-        $html .= '<p>'.$el.'</p>';
+        $html .= $el;
     } else {
         foreach ($fallbacks as $fallback) {
             if (element_exists('Dublin Core', $fallback) && ($alt = metadata($record, array('Dublin Core',$fallback)))) {
-                return '<p>'.$alt.'</p>';
+                return $alt;
             }
         }
     }
@@ -169,11 +170,11 @@ function ob_dublin($record=null, $element=null, $fallbacks=array(), $html=null)
 function ob_item_type($item=null, $element=null, $fallbacks=array(), $html=null)
 {
     if (element_exists('Item Type Metadata', $element) && ($element_text = metadata($item, array('Item Type Metadata',$element)))) {
-        $html .= '<p>'.$element_text.'</p>';
+        $html .= $element_text;
     } else {
         foreach ($fallbacks as $fallback) {
             if (element_exists('Item Type Metadata', $fallback) && ($alt = metadata($item, array('Item Type Metadata',$fallback)))) {
-                return '<p>'.$alt.'</p>';
+                return $alt;
             }
         }
     }
@@ -217,7 +218,22 @@ function ob_featured_item_block($showlink=true, $html=null)
         $html .= '<div id="featured-item">';
         $html .= '<h2>'.ob_featured_item_label('singular').'</h2>';
         $html .= random_featured_items(1, true);
-        $html .= $showlink ? '<a href="/items/browse/?featured=1">View All '.ob_featured_item_label('plural').'</a>' : null;
+        $html .= $showlink ? '<a href="/items/browse/?featured=1">'.__('View All %s', ob_featured_item_label('plural')).'</a>' : null;
+        $html .= '</div>';
+    }
+
+    return $html;
+}
+
+// return a single recent item using the preferred label
+// @todo: add req. theme options!!!
+function ob_recent_item_block($showlink=true, $html=null)
+{
+    if (get_theme_option('display_recent_item') !== '0') {
+        $html .= '<div id="recent-item">';
+        $html .= '<h2>'.__('Recently Added %s', ob_item_label('singular')).'</h2>';
+        $html .= recent_items(1, true);
+        $html .= $showlink ? '<a href="/items/browse/">'.__('View All %s', ob_item_label('plural')).'</a>' : null;
         $html .= '</div>';
     }
 
@@ -274,7 +290,7 @@ function ob_homepage_text_block_2($heading=null, $img = null, $html = null)
 
 function ob_item_url($item=null, $html=null)
 {
-    if ($url = parse_url(trim(metadata($item, array('Item Type Metadata','URL'))))) {
+    if ($url = parse_url(trim(metadata($item, array('Item Type Metadata','URL')))) && isset($url['host'])) {
         $html .= '<a href="'.$url.'" target="_blank">'.__('View @ %s', str_replace('www.', '', $url['host'])).'</a>';
     }
     return $html;
@@ -286,7 +302,7 @@ function ob_citation($item=null, $html=null)
     if ($item) {
         $html .= '<div id="item-citation" class="element">';
         $html .= '<h3>'. __('Citation').'</h3>';
-        $html .= '<div class="element-text">'.metadata('item', 'citation', array('no_escape' => true)).'</div>';
+        $html .= '<div class="element-text">'.metadata($item, 'citation', array('no_escape' => true)).'</div>';
         $html .= '</div>';
     }
     return $html;
@@ -324,9 +340,83 @@ function ob_output_formats($item=null, $html=null)
     if ($item) {
         $html .= '<div id="item-output-formats" class="element">';
         $html .= '<h3>'.__('Output Formats').'</h3>';
-        $html .= '<div class="element-text">'.output_format_list().'</div>';
+        $html .= '<div class="element-text">'.output_format_list(false).'</div>';
         $html .= '</div>';
     }
+    return $html;
+}
+
+// return secondary nav for browse views
+// primarily for items/browse but can also be used for similar menus elsewhere
+function ob_secondary_nav($type='items', $collection_id=null)
+{
+    if ($type == 'items') {
+        $navArray = array(array(
+        'label' =>__('All %s', ob_item_label('plural')),
+        'uri' => url('items/browse'),
+        ));
+
+        $navArray[] = array(
+            'label' => ob_featured_item_label('plural'),
+            'uri' => url('items/browse?featured=1'));
+
+        if (total_records('Tag')) {
+            $navArray[] = array(
+            'label' => __('%s Tags', ob_item_label()),
+            'uri' => url('items/tags'));
+        }
+
+        $navArray[] = array(
+        'label' => __('Search %s', ob_item_label('plural')),
+        'uri' => url('items/search'));
+
+        return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
+    } elseif (($type == 'collection') && (is_int($collection_id))) {
+        $navArray = array(array(
+            'label' =>__('Recent %s', ob_item_label('plural')),
+            'uri' => url('collections/show/'.$collection_id),
+            ));
+
+        $navArray[]  = array(
+            'label' =>__('All %s', ob_item_label('plural')),
+            'uri' => url('items/browse?collection='.$collection_id),
+            );
+
+        return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
+    } elseif ($type == 'collections') {
+        $navArray = array(array(
+            'label' =>__('All Collections'),
+            'uri' => url('collections/browse/'),
+            ));
+        $navArray[]  = array(
+            'label' =>__('Featured Collections'),
+            'uri' => url('collections/browse?featured=1'),
+            );
+        return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
+    } elseif ($type == 'exhibits') {
+        return null; // @todo
+    }
+}
+
+// return sort links
+function ob_sort_links($type='items', $html=null)
+{
+    if ($type='collections') {
+        $sortLinks[__('Title')] = 'Dublin Core,Title';
+        $sortLinks[__('Date Added')] = 'added';
+    } elseif ($type='exhibits') {
+        // @todo
+    } else {
+        $sortLinks[__('Title')] = 'Dublin Core,Title';
+        $sortLinks[__('Creator')] = 'Dublin Core,Creator';
+        $sortLinks[__('Date Added')] = 'added';
+    }
+
+    $html .= '<div id="sort-links">';
+    $html .= '<span class="sort-label">'.__('Sort by: ').'</span>';
+    $html .= browse_sort_links($sortLinks);
+    $html .= '</div>';
+
     return $html;
 }
 
@@ -340,6 +430,84 @@ function ob_item_pagination($item=null, $html=null)
         $html .= '<li id="next-item" class="next">'.link_to_next_item_show().'</li>';
         $html .= '</ul>';
         $html .= '</nav>';
+    }
+    return $html;
+}
+
+// returns the item description with fallbacks
+// set $snippet to true to return truncated text
+function ob_item_description($item=null, $snippet=false, $length=250, $html=null)
+{
+    $html .= metadata($item, array('Dublin Core', 'Description'));
+    if (!$html) {
+        $html .= ob_item_type($item, 'Abstract', array('Text','Lesson Plan Text','Transcription'));
+    }
+    if (!$html && $snippet) {
+        $html .= __('Preview text unavailable.');
+    }
+    return $snippet ? strip_tags(snippet($html, 0, $length, '&hellip;')) : $html;
+}
+
+// returns item metadata card for browse views, etc
+function ob_item_card($item=null, $view=null, $html=null)
+{
+    if ($item) {
+        $html .= '<div class="item hentry">';
+        $html .= '<h2>'.link_to_item(null, array('class' => 'permalink')).'</h2>';
+        $html .= '<div class="item-meta">';
+        if (metadata('item', 'has files')) {
+            $html .= '<div class="item-img">';
+            $html .= link_to_item(item_image());
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="item-description">';
+        $html .= ob_item_description($item, 250);
+        $html .= '</div>';
+
+        if (metadata('item', 'has tags')) {
+            $html .= '<div class="tags">';
+            $html .= '<p><strong>'.__('Tags').':</strong> '.tag_string('items').'</p>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+        if ($view) {
+            fire_plugin_hook('public_items_browse_each', array('view' => $view, 'item' => $item));
+        }
+        $html .= '</div>';
+    }
+    return $html;
+}
+
+function ob_collection_card($collection=null, $view=null, $html=null)
+{
+    if ($collection) {
+        $html .= '<div class="collection hentry">';
+        $html .= '<h2>'.link_to_collection().'</h2>';
+        if ($collectionImage = record_image('collection')) {
+            $html .= link_to_collection($collectionImage, array('class' => 'image'));
+        }
+
+        if (metadata('collection', array('Dublin Core', 'Description'))) {
+            $html .= '<div class="collection-description">';
+            $html .= text_to_paragraphs(metadata('collection', array('Dublin Core', 'Description'), array('snippet' => 150)));
+            $html .= '</div>';
+        }
+
+        if ($collection->hasContributor()) {
+            $html .= '<div class="collection-contributors">';
+            $html .= '<p><strong>'.__('Contributors').':</strong>'.metadata('collection', array('Dublin Core', 'Contributor'), array('all' => true, 'delimiter' => ', ')).'</p>';
+            $html .= '</div>';
+        }
+
+        $html .= link_to_items_browse(__('View the items in %s', metadata('collection', 'rich_title', array('no_escape' => true))), array('collection' => metadata('collection', 'id')), array('class' => 'view-items-link'));
+
+        if ($view) {
+            $html .= fire_plugin_hook('public_collections_browse_each', array('view' => $view, 'collection' => $collection));
+        }
+
+        $html .= '</div>';
     }
     return $html;
 }
