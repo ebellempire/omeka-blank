@@ -7,13 +7,16 @@ $total = metadata('collection', 'total_items');
 
 <!-- Title -->
 <div id="collection-title">
-    <h1><?php echo metadata('collection', 'rich_title', array('no_escape' => true)); ?></h1>
+    <h1><?php echo metadata($collection, 'rich_title', array('no_escape' => true)); ?></h1>
+    <?php echo ob_byline($collection);?>
 </div>
 
 <!-- Primary Content -->
 <div id="primary-content">
     <!-- Description -->
-    <?php echo metadata('collection', array('Dublin Core','Description'));?>
+    <div class="main-text">
+        <?php echo metadata($collection, array('Dublin Core','Description'));?>
+    </div>
 
     <?php echo ob_secondary_nav('collection', $collection->id);?>
 
@@ -30,8 +33,6 @@ $total = metadata('collection', 'total_items');
 </div>
 
 <!-- All Metadata -->
-<div id="full-metadata-record">
-    <?php echo all_element_texts('collection', array('show_element_set_headings'=>false)); ?>
-</div>
+<?php echo ob_all_metadata($collection, get_theme_option('collections_full_record'));?>
 
 <?php echo foot(); ?>

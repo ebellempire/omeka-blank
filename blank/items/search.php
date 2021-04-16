@@ -1,5 +1,5 @@
 <?php
-$pageTitle = __('Search %s', ob_item_label('plural'));
+$pageTitle = __('%s Search', ob_item_label('plural'));
 echo head(array('title' => $pageTitle,'bodyclass' => 'items advanced-search'));
 ?>
 

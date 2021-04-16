@@ -61,16 +61,6 @@ article#content > nav {
   text-align: center;
 }
 
-/* Search */
-.search-container.center form {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-.search-container.center form input[type="text"] {
-  width: 100%;
-}
-
 /* Pagination */
 .pagination,
 .item-pagination {

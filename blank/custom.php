@@ -52,8 +52,8 @@ function ob_audio_markup($file, $mime, $index=0, $html=null)
         $html .= '<div class="item-file audio" id="audio-'.$index.'">';
         $html .= '<audio class="htmlaudio" controls preload="auto">';
         $html .= '<source src="'.$url.'" type="'.$mime.'"/>';
-        $html .= "Your browser doesn't support HTML &lt;audio&rt;";
-        $html .= '<a href="'.$url.'">Download the file</a>.';
+        $html .= __("Your browser does not support HTML &lt;audio&rt; tag");
+        $html .= ' &rarr; <a href="'.$url.'">'.__('Download the file').'</a>';
         $html .= '</audio>';
         $html .= '</div>';
     }
@@ -68,8 +68,8 @@ function ob_video_markup($file, $mime, $index=0, $html=null)
         $html .= '<div class="item-file video" id="video-'.$index.'">';
         $html .= '<video class="htmlvideo" controls playsinline preload="auto">';
         $html .= '<source src="'.$url.'" type="'.$mime.'"/>';
-        $html .= "Your browser doesn't support HTML &lt;video&rt;";
-        $html .= '<a href="'.$url.'">Download the file</a>.';
+        $html .= __("Your browser does not support HTML &lt;video&rt; tag");
+        $html .= ' &rarr; <a href="'.$url.'">'.__('Download the file').'</a>';
         $html .= '</video>';
         $html .= '</div>';
     }
@@ -79,10 +79,15 @@ function ob_video_markup($file, $mime, $index=0, $html=null)
 // looks for the URL metadata field and converts relevant links to embed codes
 function ob_embed_codes($item=null, $html=null)
 {
-    if ($url = parse_url(trim(metadata($item, array('Item Type Metadata','URL'))))) {
-        if (isset($url['host']) && isset($url['query'])) {
-            if ($url['host'] == ('youtu.be' || 'www.youtube.com')) { // YouTube
-                $html .= '<div class="item-file embed youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/'.str_replace('v=', '', $url['query']).'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+    if ($urls = metadata($item, array('Item Type Metadata','URL'), array('all'=>true))) {
+        foreach ($urls as $url) {
+            $url = parse_url(strip_tags(trim($url)));
+            if (isset($url['host']) && isset($url['query'])) {
+                // YouTube
+                if ($url['host'] == ('youtu.be' || 'www.youtube.com')) {
+                    $html .= '<div class="item-file embed youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/'.str_replace('v=', '', $url['query']).'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+                }
+                // @todo: add additional services
             }
         }
     }
@@ -95,7 +100,9 @@ function ob_embed_codes($item=null, $html=null)
 // If the URL metadata field is a youtube link, we'll create an embed code and put it at the top
 function ob_item_files($item=null, $gallery=false, $img_index=0, $audio_index=0, $video_index=0, $gallery_html = null, $html=null)
 {
-    $html .= ob_embed_codes($item); // @todo: this should be a theme option!!!
+    if (get_theme_option('auto_embed_services') == 1) {
+        $html .= ob_embed_codes($item);
+    }
 
     if (metadata($item, 'has files')) {
         foreach (loop('files', $item->Files) as $file) {
@@ -250,11 +257,11 @@ function ob_cta_block($html = null)
     $target = get_theme_option('cta_target') ? 'target="_blank"' : null;
 
     if ($url && $label) {
-        $html .= '<div id="cta">';
+        $html .= '<aside id="cta">';
         $html .= '<h2>'.$heading.'</h2>';
         $html .= '<p>'.$text.'</p>';
         $html .= '<a href="'.$url.'" '.$target.'>'.$label.'</a>';
-        $html .= '</div>';
+        $html .= '</aside>';
     }
 
     return $html;
@@ -288,11 +295,26 @@ function ob_homepage_text_block_2($heading=null, $img = null, $html = null)
     return $html;
 }
 
-function ob_item_url($item=null, $html=null)
+// returns a styled button using the URL metadata field
+// returns null if the URL field is used more than once per item (or if admin has disabled this option)
+// this prevents UX issues that might be caused if admin is also using ob_embed_codes() for multiple URLs
+// see also: ob_embed_codes()
+function ob_item_url($item=null, $index=0, $html=null)
 {
-    if ($url = parse_url(trim(metadata($item, array('Item Type Metadata','URL')))) && isset($url['host'])) {
-        $html .= '<a href="'.$url.'" target="_blank">'.__('View @ %s', str_replace('www.', '', $url['host'])).'</a>';
+    if (get_theme_option('url_button') == 1) {
+        if ($urls = metadata($item, array('Item Type Metadata','URL'), array('all'=>true))) {
+            // skip if > 1
+            if (count($urls) > 1) {
+                return null;
+            }
+            // create the linked button
+            $url = parse_url(strip_tags(trim($urls[0])));
+            if (isset($url['host'])) {
+                $html .= '<a class="button" id="external-link-'.$index.'" href="'.$url.'" target="_blank">'.__('view @ %s', str_replace('www.', '', $url['host'])).'</a>';
+            }
+        }
     }
+
     return $html;
 }
 
@@ -352,23 +374,33 @@ function ob_secondary_nav($type='items', $collection_id=null)
 {
     if ($type == 'items') {
         $navArray = array(array(
-        'label' =>__('All %s', ob_item_label('plural')),
-        'uri' => url('items/browse'),
+            'label' =>__('All %s', ob_item_label('plural')),
+            'uri' => url('items/browse'),
         ));
 
-        $navArray[] = array(
+        $navArray[] = array( // @todo: this should be a theme option
             'label' => ob_featured_item_label('plural'),
             'uri' => url('items/browse?featured=1'));
 
         if (total_records('Tag')) {
             $navArray[] = array(
-            'label' => __('%s Tags', ob_item_label()),
-            'uri' => url('items/tags'));
+                'label' => __('%s Tags', ob_item_label()),
+                'uri' => url('items/tags'));
+        }
+
+        if (plugin_is_active("Geolocation")) {
+            $navArray[] = array(
+                'label' => __('%s Map', ob_item_label()),
+                'uri' => url('items/map'));
         }
 
         $navArray[] = array(
-        'label' => __('Search %s', ob_item_label('plural')),
-        'uri' => url('items/search'));
+            'label' => __('%s Search', ob_item_label()),
+            'uri' => url('items/search'));
+
+        $navArray[] = array(
+            'label' => __('Site Search'),
+            'uri' => url('search'));
 
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     } elseif (($type == 'collection') && (is_int($collection_id))) {
@@ -394,7 +426,17 @@ function ob_secondary_nav($type='items', $collection_id=null)
             );
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     } elseif ($type == 'exhibits') {
-        return null; // @todo
+        $navArray = array(
+            array(
+                'label' => __('All Exhibits'),
+                'uri' => url('exhibits')
+            ),
+            array(
+                'label' => __('Exhibit Tags'),
+                'uri' => url('exhibits/tags')
+            )
+        );
+        return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     }
 }
 
@@ -432,6 +474,56 @@ function ob_item_pagination($item=null, $html=null)
         $html .= '</nav>';
     }
     return $html;
+}
+
+// takes an array of texts and returns a formatted string
+// e.g. ['Larry','Curly','Moe'] returns "Larry, Curly, & Moe"
+// adapted from Omeka:Item->getCitation()
+function ob_chicago_style($texts=array(), $text=null)
+{
+    switch (count($texts)) {
+        case 1:
+            $text = $texts[0];
+            break;
+        case 2:
+            $text = __('%1$s and %2$s', $texts[0], $texts[1]);
+            break;
+        case 3:
+            $text = __('%1$s, %2$s, &amp; %3$s', $texts[0], $texts[1], $texts[2]);
+            break;
+        default:
+            $text = __('%s et al.', $texts[0]);
+    }
+    return $text;
+}
+
+// return a standard byline for an item or collection
+function ob_byline($record=null, $separator=' | ', $creators=array(), $contributors=array(), $byline=array())
+{
+    if (get_theme_option('byline_creator')) {
+        if ($all_creators = metadata($record, array('Dublin Core', 'Creator'), array('all'=>true))) {
+            $byline[] = '<span class="byline-creators"><span class="byline-label">'.(count($all_creators) == 1 ? __('Creator') : __('Creators')).':</span><span> '.ob_chicago_style($all_creators).'</span></span>';
+        }
+    }
+
+    if (get_theme_option('byline_contributor')) {
+        if ($all_contributors = metadata($record, array('Dublin Core', 'Contributor'), array('all'=>true))) {
+            $byline[] = '<span class="byline-contributors"><span class="byline-label">'.(count($all_contributors) == 1 ? __('Contributor') : __('Contributors')).':</span><span> '.ob_chicago_style($all_contributors).'</span></span>';
+        }
+    }
+
+    if (get_theme_option('byline_date')) {
+        if ($dates = metadata($record, array('Dublin Core', 'Date'), array('all'=>true))) {
+            if (count($dates) > 1) {
+                $date = __('%1s to %2s', $dates[0], $dates[(count($dates)-1)]);
+            } else {
+                $date = $dates[0];
+            }
+            $byline[] = '<span class="byline-date"><span class="byline-label">'.(count($dates) == 1 ? __('Date') : __('Dates')).':</span><span> '.$date.'</span></span>';
+        }
+    }
+
+    return count($byline) ? '<div id="byline">'.implode('<span class="separator">'.$separator.'</span>', $byline).'</div>' : null;
 }
 
 // returns the item description with fallbacks
@@ -480,6 +572,7 @@ function ob_item_card($item=null, $view=null, $html=null)
     return $html;
 }
 
+// returns collection metadata card for browse views, etc
 function ob_collection_card($collection=null, $view=null, $html=null)
 {
     if ($collection) {
@@ -509,5 +602,35 @@ function ob_collection_card($collection=null, $view=null, $html=null)
 
         $html .= '</div>';
     }
+    return $html;
+}
+
+// returns exhibit metadata card for browse views, search results
+// @todo: !!!
+function ob_exhibit_card($exhibit=null, $view=null, $html=null)
+{
+    return $html;
+}
+
+// returns file metadata card for search results
+// @todo: !!!
+function ob_file_card($file=null, $view=null, $html=null)
+{
+    return $html;
+}
+
+// returns file metadata card for search results
+// @todo: !!!
+function ob_site_search_results($record=null, $view=null, $html=null)
+{
+    return $html;
+}
+
+// returns full metadata record with or without interactive toggle state
+function ob_all_metadata($record =null, $show=1, $html=null)
+{
+    $html .= '<div data-button-label="'.__('View Additional Details').'" id="full-metadata-record" class="'.($show == 1 ? 'static' : 'interactive').'">';
+    $html .= all_element_texts($record, array('show_element_set_headings'=>false));
+    $html .= '</div>';
     return $html;
 }

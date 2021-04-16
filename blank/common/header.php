@@ -66,8 +66,9 @@
                 <?php echo public_nav_main(); ?>
             </nav>
         </div>
-        <div class="search-container center" role="search">
-            <?php echo search_form(); ?>
+        <div class="search-container" role="search">
+            <!-- @todo: theme option for site search (simple/advanced) vs. items search -->
+            <?php echo search_form(array('show_advanced' => true)); ?>
         </div>
 
     </header>
