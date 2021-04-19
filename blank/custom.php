@@ -540,6 +540,61 @@ function ob_item_description($item=null, $snippet=false, $length=250, $html=null
     return $snippet ? strip_tags(snippet($html, 0, $length, '&hellip;')) : $html;
 }
 
+// returns a fallback thumbnail image even if the record has no files
+function ob_item_image($item = null, $html = null)
+{
+    if ($item) {
+        if (metadata($item, 'has files')) {
+            // default behavior if there is a file
+            $html .= item_image();
+        } else {
+            // customize when there is no file and a thumbnail is desired
+            $type = get_record_by_id('ItemType', $item->item_type_id);
+
+            if ($type && isset($type['name'])) {
+                $typename = $type['name'];
+
+                switch ($typename) {
+
+                    case 'Oral History':
+                    $src = img('fallback-audio.png');
+                    break;
+
+                    case 'Sound':
+                    $src = img('fallback-audio.png');
+                    break;
+
+                    case 'Moving Image':
+                    $src = img('fallback-video.png');
+                    break;
+
+                    case strripos($typename, 'Audio'):
+                    // any (custom?) type containing the string 'audio'
+                    $src = img('fallback-audio.png');
+                    break;
+
+                    case strripos($typename, 'Video'):
+                    // any (custom?) type containing the string 'video'
+                    $src = img('fallback-video.png');
+                    break;
+
+                    case strripos($typename, 'Image'):
+                    // any (custom?) type containing the string 'image'
+                    $src = img('fallback-image.png');
+                    break;
+
+                    default:
+                    $src = img('fallback-file.png');
+
+                }
+
+                $html .= '<img class="placeholder-image" src="'.$src.'"/>';
+            }
+        }
+    }
+    return $html;
+}
+
 // returns item metadata card for browse views, etc
 function ob_item_card($item=null, $view=null, $html=null)
 {
@@ -547,11 +602,10 @@ function ob_item_card($item=null, $view=null, $html=null)
         $html .= '<div class="item hentry">';
         $html .= '<h2>'.link_to_item(null, array('class' => 'permalink')).'</h2>';
         $html .= '<div class="item-meta">';
-        if (metadata('item', 'has files')) {
-            $html .= '<div class="item-img">';
-            $html .= link_to_item(item_image());
-            $html .= '</div>';
-        }
+        $html .= '<div class="item-img">';
+        $html .= link_to_item(ob_item_image($item));
+        $html .= '</div>';
+
 
         $html .= '<div class="item-description">';
         $html .= ob_item_description($item, 250);
