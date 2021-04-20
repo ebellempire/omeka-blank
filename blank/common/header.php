@@ -64,6 +64,8 @@
         <div id="nav-container" class="top">
             <nav class="center" id="top-nav" role="navigation">
                 <?php echo public_nav_main(); ?>
+                <?php echo ob_svg_search_icon();?>
+                <?php echo ob_svg_hamburger_icon();?>
             </nav>
         </div>
         <div class="search-container" role="search">

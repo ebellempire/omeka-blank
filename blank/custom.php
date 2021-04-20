@@ -30,6 +30,7 @@ function ob_isVideo($mime=null)
 // return img markup
 // used by: ob_item_files()
 // data-attributes on container link can be used for lightbox-style image viewer
+// includes alt tags based on file metadata
 function ob_img_markup($file, $size='fullsize', $index=0, $html=null)
 {
     if (($url = $file->getWebPath($size))) {
@@ -77,17 +78,22 @@ function ob_video_markup($file, $mime, $index=0, $html=null)
 }
 
 // looks for the URL metadata field and converts relevant links to embed codes
+// uses responsive iframe markup when possible
+// @todo: add additional services, e.g. twitter?
 function ob_embed_codes($item=null, $html=null)
 {
     if ($urls = metadata($item, array('Item Type Metadata','URL'), array('all'=>true))) {
         foreach ($urls as $url) {
             $url = parse_url(strip_tags(trim($url)));
-            if (isset($url['host']) && isset($url['query'])) {
+            if (isset($url['host'])) {
                 // YouTube
-                if ($url['host'] == ('youtu.be' || 'www.youtube.com')) {
-                    $html .= '<div class="item-file embed youtube"><iframe width="560" height="315" src="https://www.youtube.com/embed/'.str_replace('v=', '', $url['query']).'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+                if ($url['host'] == ('youtu.be' || 'www.youtube.com') && isset($url['query'])) {
+                    $html .= '<div class="item-file embed youtube" style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://www.youtube.com/embed/'.str_replace('v=', '', $url['query']).'" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
                 }
-                // @todo: add additional services
+                // Vimeo
+                if ($url['host'] == 'vimeo.com' && isset($url['path'])) {
+                    $html .= '<div class="item-file embed vimeo" style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video'.$url['path'].'" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Vimeo video player" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>';
+                }
             }
         }
     }
@@ -95,9 +101,9 @@ function ob_embed_codes($item=null, $html=null)
 }
 
 // return custom markup for all files
-// defaults to standard Omeka output when mime type is not on the whitelist
+// defaults to standard Omeka output when mime type is not on the whitelist (e.g. ob_isAudio($mime))
 // set $gallery=true to use one fullsize image followed by thumbnail images
-// If the URL metadata field is a youtube link, we'll create an embed code and put it at the top
+// If the URL metadata field is an embeddable link, we'll create an embed code and put it at the top
 function ob_item_files($item=null, $gallery=false, $img_index=0, $audio_index=0, $video_index=0, $gallery_html = null, $html=null)
 {
     if (get_theme_option('auto_embed_services') == 1) {
@@ -134,6 +140,7 @@ function ob_item_files($item=null, $gallery=false, $img_index=0, $audio_index=0,
 }
 
 // preferred label for items
+// not recommended if you plan to internationalize the text labels as that process requires static strings
 function ob_item_label($type="singular")
 {
     if ($type !== "singular") {
@@ -145,6 +152,7 @@ function ob_item_label($type="singular")
 }
 
 // preferred label for featured items
+// not recommended if you plan to internationalize the text labels as that process requires static strings
 function ob_featured_item_label($type="singular")
 {
     if ($type="plural") {
@@ -158,6 +166,8 @@ function ob_featured_item_label($type="singular")
 // get Dublin Core metadata with fallbacks
 // fallbacks must be valid Dublin Core elements
 // can be used with files, e.g. to create alt text in ob_img_markup()
+// esp. useful if you have a dedicated area for "main" text
+// e.g. ob_dublin($record, 'Creator', array('Contributor','Publisher'))
 function ob_dublin($record=null, $element=null, $fallbacks=array(), $html=null)
 {
     if (element_exists('Dublin Core', $element) && ($el = metadata($record, array('Dublin Core',$element)))) {
@@ -174,6 +184,8 @@ function ob_dublin($record=null, $element=null, $fallbacks=array(), $html=null)
 
 // get Item Type metadata with fallbacks
 // fallbacks must be valid Item Type elements
+// esp. useful if you have a dedicated area for "main" text
+// e.g. ob_item_type($record, 'Abstract', array('Text','Transcription','Lesson Plan Text'))
 function ob_item_type($item=null, $element=null, $fallbacks=array(), $html=null)
 {
     if (element_exists('Item Type Metadata', $element) && ($element_text = metadata($item, array('Item Type Metadata',$element)))) {
@@ -189,6 +201,7 @@ function ob_item_type($item=null, $element=null, $fallbacks=array(), $html=null)
 }
 
 // return select metadata fields
+// esp. useful if you plan to foreground certain metadata fields
 function ob_select_metadata($item=null, $dc_elements=array(), $itemtype_elements=array(), $html=null)
 {
     if (count($dc_elements)) {
@@ -310,7 +323,7 @@ function ob_item_url($item=null, $index=0, $html=null)
             // create the linked button
             $url = parse_url(strip_tags(trim($urls[0])));
             if (isset($url['host'])) {
-                $html .= '<a class="button" id="external-link-'.$index.'" href="'.$url.'" target="_blank">'.__('view @ %s', str_replace('www.', '', $url['host'])).'</a>';
+                $html .= '<a class="button" id="external-link-'.$index.'" href="'.$urls[0].'" target="_blank">'.__('view @ %s', str_replace('www.', '', $url['host'])).'</a>';
             }
         }
     }
@@ -378,9 +391,12 @@ function ob_secondary_nav($type='items', $collection_id=null)
             'uri' => url('items/browse'),
         ));
 
-        $navArray[] = array( // @todo: this should be a theme option
-            'label' => ob_featured_item_label('plural'),
-            'uri' => url('items/browse?featured=1'));
+        if (get_theme_option('featured_secondary_nav') == 1) {
+            $navArray[] = array(
+                 'label' => ob_featured_item_label('plural'),
+                 'uri' => url('items/browse?featured=1'));
+        }
+
 
         if (total_records('Tag')) {
             $navArray[] = array(
@@ -437,24 +453,28 @@ function ob_secondary_nav($type='items', $collection_id=null)
             )
         );
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
+    } else {
+        return null;
     }
 }
 
 // return sort links
 function ob_sort_links($type='items', $html=null)
 {
-    if ($type='collections') {
+    if ($type == 'collections') {
         $sortLinks[__('Title')] = 'Dublin Core,Title';
         $sortLinks[__('Date Added')] = 'added';
-    } elseif ($type='exhibits') {
-        // @todo
+    } elseif ($type == 'exhibits') {
+        $sortLinks[__('Date Added')] = 'added';
+    } elseif ($type == 'search') {
+        $sortLinks[__('Type')] = 'record_type';
+        $sortLinks[__('Title')] = 'title';
     } else {
         $sortLinks[__('Title')] = 'Dublin Core,Title';
         $sortLinks[__('Creator')] = 'Dublin Core,Creator';
         $sortLinks[__('Date Added')] = 'added';
     }
-
-    $html .= '<div id="sort-links">';
+    $html .= '<div id="sort-links" class="sort-'.$type.'">';
     $html .= '<span class="sort-label">'.__('Sort by: ').'</span>';
     $html .= browse_sort_links($sortLinks);
     $html .= '</div>';
@@ -638,7 +658,7 @@ function ob_collection_card($collection=null, $view=null, $html=null)
 
         if (metadata('collection', array('Dublin Core', 'Description'))) {
             $html .= '<div class="collection-description">';
-            $html .= text_to_paragraphs(metadata('collection', array('Dublin Core', 'Description'), array('snippet' => 150)));
+            $html .= metadata('collection', array('Dublin Core', 'Description'), array('snippet' => 250));
             $html .= '</div>';
         }
 
@@ -659,32 +679,180 @@ function ob_collection_card($collection=null, $view=null, $html=null)
     return $html;
 }
 
-// returns exhibit metadata card for browse views, search results
-// @todo: !!!
+// returns exhibit metadata card for browse views, etc.
 function ob_exhibit_card($exhibit=null, $view=null, $html=null)
 {
+    $html .= '<div class="exhibit hentry">';
+    $html .= '<h2>'.link_to_exhibit().'</h2>';
+    if ($exhibitImage = record_image($exhibit)) {
+        $html .= exhibit_builder_link_to_exhibit($exhibit, $exhibitImage, array('class' => 'image'));
+    }
+    if ($exhibitDescription = metadata('exhibit', 'description', array('no_escape' => true))) {
+        $html .= '<div class="exhibit-description">';
+        $html .= $exhibitDescription;
+        $html .= ' </div>';
+    }
+    if ($exhibitTags = tag_string('exhibit', 'exhibits')) {
+        $html .= '<p class="tags">'.$exhibitTags.'</p>';
+    }
+    $html .= '</div>';
+
     return $html;
 }
 
-// returns file metadata card for search results
-// @todo: !!!
-function ob_file_card($file=null, $view=null, $html=null)
+// returns record metadata card for site search results
+// includes (fallback) images, text snippets, and add'l context whenever possible
+function ob_search_record_card($searchText=null, $view=null, $html=null)
 {
+    $unCamel = new Zend_Filter_Word_CamelCaseToSeparator(' ');
+    $dashCamel = new Zend_Filter_Word_CamelCaseToSeparator('-');
+    $record = get_record_by_id($searchText['record_type'], $searchText['record_id']);
+    $recordType = $searchText['record_type'];
+    $typeClass = strtolower($dashCamel->filter($recordType));
+    $typeLabel = $recordType == "Item" ? ob_item_label() : $unCamel->filter(str_replace('PagesPage', 'Page', $recordType));
+    $recordTitle = $searchText['title'] ? $searchText['title'] : '['.__('Untitled').']';
+    set_current_record($recordType, $record);
+
+    switch ($recordType) {
+        case 'Item':
+        $recordImage = ob_item_image($record);
+        $recordText = ob_item_description($record, true, 250);
+        break;
+
+        case 'Collection':
+        $recordImage = record_image($recordType);
+        $recordText = metadata($record, array('Dublin Core', 'Description'), array('snippet'=>250));
+        break;
+
+        case 'File':
+        if (substr($recordTitle, 0, 4) === "http") {
+            $recordTitle = '['.__('Untitled').']';
+        }
+        $recordImage = record_image($recordType);
+        $recordText = __('Appears in %s', ob_item_label()).': '.link_to_item(null, array(), 'show', $record->getItem());
+        break;
+
+        case 'Exhibit':
+        $recordImage = record_image($recordType);
+        $recordText = metadata($record, 'description', array('no_escape' => true, 'snippet'=>250));
+        break;
+
+        case 'ExhibitPage':
+        $parent = $record->getExhibit();
+        $recordText = __('Appears in Exhibit').': <a href="/exhibits/show/'.$parent->slug.'">'.metadata($parent, 'title', array('no_escape' => true, 'snippet'=>250)).'</a>';
+        break;
+
+        case 'SimplePagesPage':
+        $recordText = metadata('simple_pages_page', 'text', array('no_escape' => true, 'snippet'=>250));
+        break;
+
+        default:
+        $recordImage = record_image($recordType);
+    }
+
+    $html .= '<div class="search hentry '.$typeClass.'">';
+    $html .= '<div class="search-record-type">'.$typeLabel.'</div>';
+    $html .= '<h2><a href="'.record_url($record, 'show').'">'.$recordTitle.'</a></h2>';
+    $html .= $recordImage ? link_to($record, 'show', $recordImage, array('class' => 'search-image')) : null;
+    $html .= '<div class="search-description">'.($recordText ? $recordText : __('Preview text unavailable.')).'</div>';
+    $html .= '</div>';
+
     return $html;
 }
 
-// returns file metadata card for search results
-// @todo: !!!
-function ob_site_search_results($record=null, $view=null, $html=null)
-{
-    return $html;
-}
-
-// returns full metadata record with or without interactive toggle state
+// returns full metadata record with or without markup for interactive toggle state
 function ob_all_metadata($record =null, $show=1, $html=null)
 {
     $html .= '<div data-button-label="'.__('View Additional Details').'" id="full-metadata-record" class="'.($show == 1 ? 'static' : 'interactive').'">';
     $html .= all_element_texts($record, array('show_element_set_headings'=>false));
     $html .= '</div>';
     return $html;
+}
+
+
+// returns svg markup for icons
+// https://ionicons.com/
+// MIT License
+function ob_svg_hamburger_icon($size=30)
+{
+    return "<span class='icon open-menu'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Menu')."</title><path d='M64 384h384v-42.67H64zm0-106.67h384v-42.66H64zM64 128v42.67h384V128z'/></svg></span>";
+}
+
+function ob_svg_search_icon($size=30)
+{
+    return "<span class='icon open-search'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Search')."</title><path d='M464 428L339.92 303.9a160.48 160.48 0 0030.72-94.58C370.64 120.37 298.27 48 209.32 48S48 120.37 48 209.32s72.37 161.32 161.32 161.32a160.48 160.48 0 0094.58-30.72L428 464zM209.32 319.69a110.38 110.38 0 11110.37-110.37 110.5 110.5 0 01-110.37 110.37z'/></svg></span>";
+}
+
+function ob_svg_facebook_icon($size=30)
+{
+    return "<span class='icon facebook'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Facebook')."</title><path d='M480 257.35c0-123.7-100.3-224-224-224s-224 100.3-224 224c0 111.8 81.9 204.47 189 221.29V322.12h-56.89v-64.77H221V208c0-56.13 33.45-87.16 84.61-87.16 24.51 0 50.15 4.38 50.15 4.38v55.13H327.5c-27.81 0-36.51 17.26-36.51 35v42h62.12l-9.92 64.77H291v156.54c107.1-16.81 189-109.48 189-221.31z' fill-rule='evenodd'/></svg></span>";
+}
+
+function ob_svg_twitter_icon($size=30)
+{
+    return "<span class='icon twitter'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Twitter')."</title><path d='M496 109.5a201.8 201.8 0 01-56.55 15.3 97.51 97.51 0 0043.33-53.6 197.74 197.74 0 01-62.56 23.5A99.14 99.14 0 00348.31 64c-54.42 0-98.46 43.4-98.46 96.9a93.21 93.21 0 002.54 22.1 280.7 280.7 0 01-203-101.3A95.69 95.69 0 0036 130.4c0 33.6 17.53 63.3 44 80.7A97.5 97.5 0 0135.22 199v1.2c0 47 34 86.1 79 95a100.76 100.76 0 01-25.94 3.4 94.38 94.38 0 01-18.51-1.8c12.51 38.5 48.92 66.5 92.05 67.3A199.59 199.59 0 0139.5 405.6a203 203 0 01-23.5-1.4A278.68 278.68 0 00166.74 448c181.36 0 280.44-147.7 280.44-275.8 0-4.2-.11-8.4-.31-12.5A198.48 198.48 0 00496 109.5z'/></svg></span>";
+}
+
+function ob_svg_youtube_icon($size=30)
+{
+    return "<span class='icon youtube'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('YouTube')."</title><path d='M508.64 148.79c0-45-33.1-81.2-74-81.2C379.24 65 322.74 64 265 64h-18c-57.6 0-114.2 1-169.6 3.6C36.6 67.6 3.5 104 3.5 149 1 184.59-.06 220.19 0 255.79q-.15 53.4 3.4 106.9c0 45 33.1 81.5 73.9 81.5 58.2 2.7 117.9 3.9 178.6 3.8q91.2.3 178.6-3.8c40.9 0 74-36.5 74-81.5 2.4-35.7 3.5-71.3 3.4-107q.34-53.4-3.26-106.9zM207 353.89v-196.5l145 98.2z'/></svg></span>";
+}
+
+function ob_svg_pinterest_icon($size=30)
+{
+    return "<span class='icon pinterest'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Pinterest')."</title><path d='M256.05 32c-123.7 0-224 100.3-224 224 0 91.7 55.2 170.5 134.1 205.2-.6-15.6-.1-34.4 3.9-51.4 4.3-18.2 28.8-122.1 28.8-122.1s-7.2-14.3-7.2-35.4c0-33.2 19.2-58 43.2-58 20.4 0 30.2 15.3 30.2 33.6 0 20.5-13.1 51.1-19.8 79.5-5.6 23.8 11.9 43.1 35.4 43.1 42.4 0 71-54.5 71-119.1 0-49.1-33.1-85.8-93.2-85.8-67.9 0-110.3 50.7-110.3 107.3 0 19.5 5.8 33.3 14.8 43.9 4.1 4.9 4.7 6.9 3.2 12.5-1.1 4.1-3.5 14-4.6 18-1.5 5.7-6.1 7.7-11.2 5.6-31.3-12.8-45.9-47-45.9-85.6 0-63.6 53.7-139.9 160.1-139.9 85.5 0 141.8 61.9 141.8 128.3 0 87.9-48.9 153.5-120.9 153.5-24.2 0-46.9-13.1-54.7-27.9 0 0-13 51.6-15.8 61.6-4.7 17.3-14 34.5-22.5 48a225.13 225.13 0 0063.5 9.2c123.7 0 224-100.3 224-224S379.75 32 256.05 32z'/></svg></span>";
+}
+
+function ob_svg_instagram_icon($size=30)
+{
+    return "<span class='icon instagram'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Instagram')."</title><path d='M349.33 69.33a93.62 93.62 0 0193.34 93.34v186.66a93.62 93.62 0 01-93.34 93.34H162.67a93.62 93.62 0 01-93.34-93.34V162.67a93.62 93.62 0 0193.34-93.34h186.66m0-37.33H162.67C90.8 32 32 90.8 32 162.67v186.66C32 421.2 90.8 480 162.67 480h186.66C421.2 480 480 421.2 480 349.33V162.67C480 90.8 421.2 32 349.33 32z'/><path d='M377.33 162.67a28 28 0 1128-28 27.94 27.94 0 01-28 28zM256 181.33A74.67 74.67 0 11181.33 256 74.75 74.75 0 01256 181.33m0-37.33a112 112 0 10112 112 112 112 0 00-112-112z'/></svg></span>";
+}
+
+function ob_svg_tiktok_icon($size=30)
+{
+    return "<span class='icon tiktok'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('TikTok')."</title><path d='M412.19 118.66a109.27 109.27 0 01-9.45-5.5 132.87 132.87 0 01-24.27-20.62c-18.1-20.71-24.86-41.72-27.35-56.43h.1C349.14 23.9 350 16 350.13 16h-82.44v318.78c0 4.28 0 8.51-.18 12.69 0 .52-.05 1-.08 1.56 0 .23 0 .47-.05.71v.18a70 70 0 01-35.22 55.56 68.8 68.8 0 01-34.11 9c-38.41 0-69.54-31.32-69.54-70s31.13-70 69.54-70a68.9 68.9 0 0121.41 3.39l.1-83.94a153.14 153.14 0 00-118 34.52 161.79 161.79 0 00-35.3 43.53c-3.48 6-16.61 30.11-18.2 69.24-1 22.21 5.67 45.22 8.85 54.73v.2c2 5.6 9.75 24.71 22.38 40.82A167.53 167.53 0 00115 470.66v-.2l.2.2c39.91 27.12 84.16 25.34 84.16 25.34 7.66-.31 33.32 0 62.46-13.81 32.32-15.31 50.72-38.12 50.72-38.12a158.46 158.46 0 0027.64-45.93c7.46-19.61 9.95-43.13 9.95-52.53V176.49c1 .6 14.32 9.41 14.32 9.41s19.19 12.3 49.13 20.31c21.48 5.7 50.42 6.9 50.42 6.9v-81.84c-10.14 1.1-30.73-2.1-51.81-12.61z'/></svg></span>";
+}
+
+// returns markup for configured social media icons
+// validation: just check to see if it's an actual link
+// @todo: twitch, discord, reddit, app store, google play, etc.?
+function ob_social_links($html = null)
+{
+    if ($url=get_theme_option('social_facebook')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_facebook_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_instagram')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_instagram_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_twitter')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_twitter_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_youtube')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_youtube_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_tiktok')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_tiktok_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_pinterest')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_pinterest_icon().'</a>';
+        }
+    }
+    return $html ? '<div id="social-media-links">'.$html.'</div>' : null;
 }

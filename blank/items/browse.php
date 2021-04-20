@@ -15,9 +15,14 @@ echo head(array('title' => $pageTitle, 'bodyclass' => 'items browse'));
 <?php echo ob_sort_links();?>
 
 <div id="primary-content">
-    <?php foreach (loop('items') as $item) {
-    echo ob_item_card($item, get_view());
-} ?>
+    <?php
+    if (count($items) > 0) {
+        foreach (loop('items') as $item) {
+            echo ob_item_card($item, get_view());
+        }
+    } else {
+        echo __('There are no %s available yet.', ob_item_label('plural'));
+    } ?>
 </div>
 
 <?php echo pagination_links(); ?>

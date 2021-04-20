@@ -1,8 +1,10 @@
 <?php
 $fileTitle = metadata('file', 'display_title');
-
+if (substr($fileTitle, 0, 4) === "http") {
+    $fileTitle = __('Untitled');
+}
 if ($fileTitle != '') {
-    $fileTitle = ': &quot;' . $fileTitle . '&quot; ';
+    $fileTitle = ': [' . $fileTitle . ']';
 } else {
     $fileTitle = '';
 }
