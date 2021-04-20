@@ -814,7 +814,7 @@ function ob_svg_tiktok_icon($size=30)
 }
 
 // returns markup for configured social media icons
-// validation: just check to see if it's an actual link
+// validation: just check to see if it's a valid URL
 // @todo: twitch, discord, reddit, app store, google play, etc.?
 function ob_social_links($html = null)
 {
