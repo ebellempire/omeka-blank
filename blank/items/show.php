@@ -53,4 +53,7 @@ echo head(array('title' => $title, 'bodyclass' => 'items show'));
 <!-- Pagination -->
 <?php echo ob_item_pagination($item);?>
 
+<!-- req. markup for image viewer -->
+<?php echo ob_photoswipe_markup($item);?>
+
 <?php echo foot(); ?>

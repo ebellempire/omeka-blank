@@ -32,6 +32,8 @@
     <?php
     queue_css_file('normalize');
     queue_css_file('style');
+    queue_css_file('custom');
+    queue_css_file('mmenu', 'all', false, 'javascripts/mmenu');
     if ($typekit_id = trim(get_theme_option('typekit'))) {
         queue_css_url('https://use.typekit.net/'.$typekit_id.'.css');
     }
@@ -39,6 +41,8 @@
     ?>
 
     <!-- JavaScripts -->
+    <?php queue_js_file('globals'); ?>
+    <?php queue_js_file('mmenu', 'javascripts/mmenu'); ?>
     <?php echo head_js(); ?>
 </head>
 
@@ -47,7 +51,7 @@
 <?php fire_plugin_hook('public_body', array('view' => $this)); ?>
 <div id="wrap">
 
-    <header role="banner">
+    <header role="banner" style="background-image:url(<?php echo ($bg = get_theme_option('site_banner_image')) ? '/files/theme_uploads/'.$bg : '';?>);">
 
         <?php fire_plugin_hook('public_header', array('view' => $this)); ?>
 
@@ -62,16 +66,15 @@
 
         <!-- Header Nav -->
         <div id="nav-container" class="top">
-            <nav class="center" id="top-nav" role="navigation">
+            <nav id="top-nav" role="navigation">
                 <?php echo public_nav_main(); ?>
-                <?php echo ob_svg_search_icon();?>
-                <?php echo ob_svg_hamburger_icon();?>
+                <div class="menu-icons">
+                    <a href="/items/search" id="search-button"><?php echo ob_svg_search_icon();?></a>
+                    <a href="/#" id="menu-button"><?php echo ob_svg_hamburger_icon();?></a>
+                </div>
             </nav>
         </div>
-        <div class="search-container" role="search">
-            <!-- @todo: theme option for site search (simple/advanced) vs. items search -->
-            <?php echo search_form(array('show_advanced' => true)); ?>
-        </div>
+        <?php echo ob_search_container();?>
 
     </header>
 

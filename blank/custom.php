@@ -39,7 +39,7 @@ function ob_img_markup($file, $size='fullsize', $index=0, $html=null)
         $record_url = '/files/show/'.$file->id;
 
         $html .= '<div class="item-file image '.$size.'" id="image-'.$index.'">';
-        $html .= '<a href="'.$record_url.'" data-original="'.$file->getWebPath('original').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
+        $html .= '<a href="'.$record_url.'" data-size="" data-height="" data-width="" data-original="'.$file->getWebPath('original').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
         $html .= '</div>';
     }
     return $html;
@@ -813,6 +813,11 @@ function ob_svg_tiktok_icon($size=30)
     return "<span class='icon tiktok'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('TikTok')."</title><path d='M412.19 118.66a109.27 109.27 0 01-9.45-5.5 132.87 132.87 0 01-24.27-20.62c-18.1-20.71-24.86-41.72-27.35-56.43h.1C349.14 23.9 350 16 350.13 16h-82.44v318.78c0 4.28 0 8.51-.18 12.69 0 .52-.05 1-.08 1.56 0 .23 0 .47-.05.71v.18a70 70 0 01-35.22 55.56 68.8 68.8 0 01-34.11 9c-38.41 0-69.54-31.32-69.54-70s31.13-70 69.54-70a68.9 68.9 0 0121.41 3.39l.1-83.94a153.14 153.14 0 00-118 34.52 161.79 161.79 0 00-35.3 43.53c-3.48 6-16.61 30.11-18.2 69.24-1 22.21 5.67 45.22 8.85 54.73v.2c2 5.6 9.75 24.71 22.38 40.82A167.53 167.53 0 00115 470.66v-.2l.2.2c39.91 27.12 84.16 25.34 84.16 25.34 7.66-.31 33.32 0 62.46-13.81 32.32-15.31 50.72-38.12 50.72-38.12a158.46 158.46 0 0027.64-45.93c7.46-19.61 9.95-43.13 9.95-52.53V176.49c1 .6 14.32 9.41 14.32 9.41s19.19 12.3 49.13 20.31c21.48 5.7 50.42 6.9 50.42 6.9v-81.84c-10.14 1.1-30.73-2.1-51.81-12.61z'/></svg></span>";
 }
 
+function ob_svg_snapchat_icon($size=30)
+{
+    return "<span class='icon snapchat'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Snapchat')."</title><path d='M496 347.21a190.31 190.31 0 01-32.79-5.31c-27.28-6.63-54.84-24.26-68.12-52.43-6.9-14.63-2.64-18.59 11.86-24 14.18-5.27 29.8-7.72 36.86-23 5.89-12.76 1.13-27.76-10.41-35.49-15.71-10.53-30.35-.21-46.62 2.07 3.73-46.66 8.66-88.57-22.67-127.73C338.14 48.86 297.34 32 256.29 32s-81.86 16.86-107.81 49.33c-31.38 39.26-26.4 81.18-22.67 127.92-16.32-2.25-30.81-12.79-46.63-2.18-14.72 9.85-17 29.76-5.44 43s31.64 9.5 43.45 20.6c6.49 6.09 3.49 12.61-.35 20.14-14.48 28.4-39.26 45.74-69.84 51.56-4 .76-22.31 2.87-31 3.65 0 9.28.52 16.78 1.63 21.73 2.94 13.06 12.32 23.58 23.69 30.1 11.18 6.4 35.48 6.43 41.68 15.51 3 4.48 1.76 12.28 5.33 17.38a23.8 23.8 0 0015.37 9.75c18.61 3.61 37.32-7.2 56.42-2.1 14.85 3.95 26.52 15.87 39.26 24 15.51 9.85 32.34 16.42 50.83 17.49 38.1 2.21 59.93-18.91 90.58-36.42 19.5-11.14 38.15-3.86 58.88-2.68 20.1 1.15 23.53-9.25 29.62-24.88a27.37 27.37 0 001.54-4.85 10.52 10.52 0 002.28-1.47c2-1.57 10.55-2.34 12.76-2.86 10.28-2.44 20.34-5.15 29.17-11.2 11.31-7.76 17.65-18.5 19.58-32.64a93.73 93.73 0 001.38-15.67zM208 128c8.84 0 16 10.74 16 24s-7.16 24-16 24-16-10.74-16-24 7.16-24 16-24zm103.62 77.7c-15.25 15-35 23.3-55.62 23.3a78.37 78.37 0 01-55.66-23.34 8 8 0 0111.32-11.32A62.46 62.46 0 00256 213c16.39 0 32.15-6.64 44.39-18.7a8 8 0 0111.23 11.4zM304 176c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24z'/></svg></span>";
+}
+
 // returns markup for configured social media icons
 // validation: just check to see if it's a valid URL
 // @todo: twitch, discord, reddit, app store, google play, etc.?
@@ -842,17 +847,114 @@ function ob_social_links($html = null)
             $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_youtube_icon().'</a>';
         }
     }
-    if ($url=get_theme_option('social_tiktok')) {
-        $test = parse_url($url);
-        if (isset($test['host'])) {
-            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_tiktok_icon().'</a>';
-        }
-    }
     if ($url=get_theme_option('social_pinterest')) {
         $test = parse_url($url);
         if (isset($test['host'])) {
             $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_pinterest_icon().'</a>';
         }
     }
+    if ($url=get_theme_option('social_tiktok')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_tiktok_icon().'</a>';
+        }
+    }
+    if ($url=get_theme_option('social_snapchat')) {
+        $test = parse_url($url);
+        if (isset($test['host'])) {
+            $html .= '<a href="'.$url.'" target="_blank">'.ob_svg_snapchat_icon().'</a>';
+        }
+    }
+
     return $html ? '<div id="social-media-links">'.$html.'</div>' : null;
+}
+
+// returns search container
+// See also: globals.js
+function ob_search_container($html=null)
+{
+    $html .= '<div class="search-container" role="search">';
+    $html .= '<div class="'.(get_theme_option('advanced_header_search')==1 ? 'advanced' : 'simple').'-search-inner">';
+    $html .= search_form(array('show_advanced' => (get_theme_option('advanced_header_search')==1)));
+    $html .= '</div>';
+    $html .= '</div>';
+    return $html;
+}
+
+// returns hidden markup for side menu
+function ob_mmenu_markup($html=null)
+{
+    $html .= '<div style="display:none;visibility:hidden;">';
+    $html .= '<div id="mmenu-contents" data-theme="'.($theme = get_theme_option('menu_theme') ? $theme : 'light').'">';
+    $html .= public_nav_main();
+    $html .= '</div>';
+    $html .='</div>';
+    return $html;
+}
+
+// returns hidden markup for image viewer
+function ob_photoswipe_markup($item=null, $html=null)
+{
+    if ($item && metadata($item, 'has files')) {
+        $html.='<div style="display:none;visibility:hidden;">
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="pswp__bg"></div>
+        <div class="pswp__scroll-wrap">
+            <div class="pswp__container">
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+            </div>
+            <div class="pswp__ui pswp__ui--hidden">
+                <div class="pswp__top-bar">
+                    <div class="pswp__counter"></div>
+                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                    <button class="pswp__button pswp__button--share" title="Share"></button>
+                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                          <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                    <div class="pswp__share-tooltip"></div> 
+                </div>
+                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                </button>
+                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                </button>
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center"></div>
+                </div>
+            </div>
+        </div>
+    </div></div>';
+    }
+
+    return $html;
+}
+
+// returns site info markup
+// theme info reads directly from theme.ini so make your changes there as desired
+function ob_site_info($output=array(), $html=null)
+{
+    if (get_theme_option('omeka')) {
+        $output[] .= '<p class="site-info cms">'.__('Proudly powered by %s', '<a href="http://omeka.org">Omeka</a>');
+    }
+
+    if (get_theme_option('omeka_theme')) {
+        $output[] = __(
+            'Theme: %1s by %2s',
+            '<a href="'.Theme::getTheme(Theme::getCurrentThemeName('public'))->support_link.'" target="_blank">'.Theme::getTheme(Theme::getCurrentThemeName('public'))->title.'</a>',
+            '<a href="'.Theme::getTheme(Theme::getCurrentThemeName('public'))->website.'" target="_blank">'.Theme::getTheme(Theme::getCurrentThemeName('public'))->author.'</a>'
+        ).'</p>';
+    }
+
+    $html .= implode(' | ', $output);
+
+    return $html;
 }

@@ -21,6 +21,53 @@
   color: #ff8000;
 }
 
+/* Search toggle */
+header .search-container input#query {
+  width: 100%;
+}
+header .search-container #advanced-form {
+  margin-bottom: 1em;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+@media all and (max-width: 700px) {
+  header .search-container #advanced-form {
+    flex-direction: column;
+  }
+}
+header .search-container .simple-search-inner form {
+  display: flex;
+}
+header .search-container .simple-search-inner form input {
+  margin-right: 0.5em;
+}
+header .search-container .advanced-search-inner form {
+}
+header .search-container .advanced-search-inner input#query {
+  margin-bottom: 1em;
+}
+header .search-container #advanced-form fieldset {
+  flex-grow: 1;
+}
+header .search-container {
+  position: absolute;
+  left: 0;
+  height: 0;
+  opacity: 0;
+  z-index: -1;
+  background: #ccc;
+  border: 1px solid #ccc;
+  width: 100%;
+  padding: 1em;
+  transition: all linear 0s;
+}
+header .search-container.open {
+  height: auto;
+  opacity: 1;
+  z-index: 1;
+}
+
 /* Admin Bar tweak */
 #admin-bar li {
   padding-right: 0.75em;
@@ -33,11 +80,80 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
+/* Nav */
+#nav-container {
+  padding: 0 1em;
+  background: #ccc;
+}
+nav#top-nav {
+  display: flex;
+  justify-content: flex-end;
+}
+nav#top-nav ul.navigation {
+  flex-grow: 1;
+  margin: 0;
+  display: flex;
+  list-style-type: none;
+  justify-content: space-evenly;
+  align-self: center;
+}
+#menu-button {
+  display: none;
+}
+@media all and (max-width: 700px) {
+  nav#top-nav ul.navigation {
+    display: none;
+  }
+  #menu-button {
+    display: inline-block;
+  }
+}
+nav#top-nav ul.navigation ul {
+  display: none;
+  background: #000;
+  list-style-type: none;
+  padding: 0 0 0 0;
+  position: absolute;
+  top: initial;
+  margin-left: -10px;
+  margin-top: 10px;
+}
+nav#top-nav ul.navigation li:hover a {
+  color: #fff;
+}
+nav#top-nav ul.navigation li:hover {
+  background: #000;
+  cursor: pointer;
+}
+nav#top-nav ul.navigation li:hover > ul,
+nav#top-nav ul.navigation li ul:hover > li {
+  display: block;
+}
+
+nav#top-nav ul.navigation > li {
+  padding: 10px;
+}
+nav#top-nav ul.navigation > li > ul > li {
+  padding: 10px;
+  margin: 0;
+}
+nav#top-nav .menu-icons {
+  align-self: center;
+}
+
 /* Header/Footer */
 header,
 footer {
   background-color: #eaeaea;
   margin: 0;
+  padding: 0;
+}
+
+footer > div {
+  padding: 1em;
+}
+
+#site-title {
   padding: 1em;
 }
 

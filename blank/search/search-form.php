@@ -23,7 +23,7 @@
         <?php endforeach; ?>
     </fieldset>
     <?php endif; ?>
-    <p><?php echo link_to_item_search(__('... or go to Advanced %s Search', ob_item_label('plural'))); ?></p>
+
 </div>
 <?php else: ?>
 <!-- Simple Search Form Attributes (Hidden) -->
@@ -32,9 +32,10 @@
     <?php foreach ($filters['record_types'] as $type): ?>
     <?php echo $this->formHidden('record_types[]', $type); ?>
     <?php endforeach; ?>
-    <?php endif; ?>
-</div>
 
+</div>
+<?php endif; ?>
 <!-- Submit -->
 <?php echo $this->formButton('submit_search', $options['submit_value'], array('type' => 'submit')); ?>
 </form>
+<p><?php echo link_to_item_search(__('... or go to Advanced %s Search', ob_item_label('plural'))); ?></p>

@@ -2,18 +2,6 @@
 
     <footer role="contentinfo">
 
-        <?php if (get_theme_option('footer_nav') == 1):?>
-        <!-- Footer Nav -->
-        <div id="nav-container" class="bottom">
-            <nav class="center" id="bottom-nav" role="navigation">
-                <?php echo public_nav_main(); ?>
-            </nav>
-            <div class="search-container center" role="search">
-                <?php echo search_form(); ?>
-            </div>
-        </div>
-        <?php endif;?>
-
         <div id="footer-text">
             <!-- Address -->
             <?php
@@ -34,16 +22,16 @@
                 echo '<p class="site-info copyright">&copy; '.$copyright.'</p>';
             } ?>
 
-            <!-- Omeka -->
-            <?php
-            if ((get_theme_option('omeka') == 1)) {
-                echo '<p class="site-info cms">'.__('Proudly powered by <a href="http://omeka.org">Omeka</a>.').'</p>';
-            }?>
+            <!-- Omeka info -->
+            <?php echo ob_site_info();?>
         </div>
 
         <?php fire_plugin_hook('public_footer', array('view' => $this)); ?>
 
     </footer>
+
+    <!-- req. markup for side menu -->
+    <?php echo ob_mmenu_markup();?>
 
     </div><!-- end wrap -->
     </body>
