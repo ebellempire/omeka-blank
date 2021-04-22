@@ -14,6 +14,8 @@ echo head(array('title' => $pageTitle, 'bodyclass' => 'items browse'));
 
 <?php echo ob_sort_links();?>
 
+<?php echo ob_item_type_selection();?>
+
 <div id="primary-content">
     <?php
     if (count($items) > 0) {
@@ -21,7 +23,7 @@ echo head(array('title' => $pageTitle, 'bodyclass' => 'items browse'));
             echo ob_item_card($item, get_view());
         }
     } else {
-        echo __('There are no %s available yet.', ob_item_label('plural'));
+        echo __('There are no %s matching your request.', ob_item_label('plural'));
     } ?>
 </div>
 

@@ -3,7 +3,7 @@ $collectionTitle = metadata('collection', 'display_title');
 $total = metadata('collection', 'total_items');
 ?>
 
-<?php echo head(array('title' => $collectionTitle, 'bodyclass' => 'collections show')); ?>
+<?php echo head(array('title' => $collectionTitle, 'bodyclass' => 'collections show','collection'=>$collection)); ?>
 
 <!-- Title -->
 <div id="collection-title">

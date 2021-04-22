@@ -1,16 +1,14 @@
 <?php
 $fileTitle = metadata('file', 'display_title');
 if (substr($fileTitle, 0, 4) === "http") {
-    $fileTitle = __('Untitled');
+    $fileTitle = '['.__('Untitled').']';
 }
 if ($fileTitle != '') {
-    $fileTitle = ': [' . $fileTitle . ']';
-} else {
-    $fileTitle = '';
+    $fileTitle = ': ' . $fileTitle ;
 }
 $fileTitle = __('%s', metadata('file', 'id')) . $fileTitle;
 ?>
-<?php echo head(array('title' => $fileTitle, 'bodyclass' => 'files show primary-secondary')); ?>
+<?php echo head(array('title' => $fileTitle, 'bodyclass' => 'files show primary-secondary','file'=>$file)); ?>
 
 <!-- Title -->
 <div id="file-title">

@@ -458,6 +458,29 @@ function ob_secondary_nav($type='items', $collection_id=null)
     }
 }
 
+// return item type selection dropdown
+// @todo: this is going to return some empty results if other query params are set
+// i.e. the totals only represent all items of a type, not items of a type within a subset of items being queried
+function ob_item_type_selection($options=null, $html=null)
+{
+    $totalRecords = intval(total_records('Item'));
+    $withItemType = 0;
+    $types = get_records('ItemType');
+    foreach ($types as $type) {
+        if ($type->totalItems()) {
+            $withItemType += $type->totalItems();
+            $options .= '<option value="'.$type->id.'">'.$type->name.' ('.$type->totalItems().')</option>';
+        }
+    }
+    $options .= '<option value="0">'.__("Other").' ('.($totalRecords - $withItemType).')</option>';
+    $html .= '<div id="item-type-selection">';
+    $html .= '<select onchange="item_type_filter();">';
+    $html .= '<option>'.__('Filter by Item Type').'</option>'.$options;
+    $html .= '</select>';
+    $html .= '</div>';
+    return $html;
+}
+
 // return sort links
 function ob_sort_links($type='items', $html=null)
 {
@@ -662,14 +685,6 @@ function ob_collection_card($collection=null, $view=null, $html=null)
             $html .= '</div>';
         }
 
-        if ($collection->hasContributor()) {
-            $html .= '<div class="collection-contributors">';
-            $html .= '<p><strong>'.__('Contributors').':</strong>'.metadata('collection', array('Dublin Core', 'Contributor'), array('all' => true, 'delimiter' => ', ')).'</p>';
-            $html .= '</div>';
-        }
-
-        $html .= link_to_items_browse(__('View the items in %s', metadata('collection', 'rich_title', array('no_escape' => true))), array('collection' => metadata('collection', 'id')), array('class' => 'view-items-link'));
-
         if ($view) {
             $html .= fire_plugin_hook('public_collections_browse_each', array('view' => $view, 'collection' => $collection));
         }
@@ -763,9 +778,10 @@ function ob_search_record_card($searchText=null, $view=null, $html=null)
 // returns full metadata record with or without markup for interactive toggle state
 function ob_all_metadata($record =null, $show=1, $html=null)
 {
-    $html .= '<div data-button-label="'.__('View Additional Details').'" id="full-metadata-record" class="'.($show == 1 ? 'static' : 'interactive').'">';
+    $html .= '<div data-button-label="'.__('View Additional Details').'" data-button-label-hide="'.__('Hide Additional Details').'" id="full-metadata-record" class="'.($show == 1 ? 'static' : 'interactive').'"><div class="meta-container-inner">';
     $html .= all_element_texts($record, array('show_element_set_headings'=>false));
-    $html .= '</div>';
+    $html .= ob_output_formats($record);
+    $html .= '</div></div>';
     return $html;
 }
 
@@ -885,7 +901,7 @@ function ob_search_container($html=null)
 function ob_mmenu_markup($html=null)
 {
     $html .= '<div style="display:none;visibility:hidden;">';
-    $html .= '<div id="mmenu-contents" data-theme="'.($theme = get_theme_option('menu_theme') ? $theme : 'light').'">';
+    $html .= '<div id="mmenu-contents" data-title="'.__('Menu').'" data-theme="'.($theme = get_theme_option('menu_theme') ? $theme : 'light').'">';
     $html .= public_nav_main();
     $html .= '</div>';
     $html .='</div>';
@@ -957,4 +973,45 @@ function ob_site_info($output=array(), $html=null)
     $html .= implode(' | ', $output);
 
     return $html;
+}
+
+// SEO/Social: eturns page description
+function ob_seo_pagedesc($item=null, $file=null, $collection=null)
+{
+    if ($item != null) {
+        $itemdesc=ob_item_description($item);
+        return htmlspecialchars(strip_tags($itemdesc));
+    } elseif ($collection != null) {
+        $collectiondesc = metadata($collection, array('Dublin Core','Description'));
+        return htmlspecialchars(strip_tags($collectiondesc));
+    } elseif ($file != null) {
+        $filedesc=ob_dublin($file, 'Description');
+        return htmlspecialchars(strip_tags($filedesc));
+    } else {
+        return option('description') ? option('description') : option('site_title');
+    }
+}
+
+// SEO/Social: returns page image
+function ob_seo_pageimg($item=null, $file=null, $collection=null)
+{
+    if ($item != null) {
+        if ($itemimg=record_image($item, 'fullsize')) {
+            preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $itemimg, $result);
+            $img=array_pop($result);
+        }
+    } elseif ($collection != null) {
+        if ($collectionimg=record_image($collection, 'fullsize')) {
+            preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $collectionimg, $result);
+            $img=array_pop($result);
+        }
+    } elseif ($file != null) {
+        if ($fileimg=record_image($file, 'fullsize')) {
+            preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $fileimg, $result);
+            $img=array_pop($result);
+        }
+    } elseif ($bg = get_theme_option('site_banner_image')) {
+        $img=WEB_ROOT.'/files/theme_uploads/'.$bg;
+    }
+    return isset($img) ? $img : '';
 }

@@ -14,16 +14,36 @@
     <?php endif; ?>
     <?php
     if (isset($title)) {
-        $titleParts[] = strip_formatting($title);
+        $titleParts[] = strip_formatting(trim($title));
     }
-    $titleParts[] = option('site_title');
+    $titleParts[] = trim(option('site_title'));
     if (!isset($title) && get_theme_option('site_subheading')) {
-        $titleParts[] = get_theme_option('site_subheading');
+        $titleParts[] = trim(
+            get_theme_option('site_subheading')
+        );
     }
     ?>
     <title><?php echo implode(' &middot; ', $titleParts); ?></title>
 
     <?php echo auto_discovery_link_tags(); ?>
+
+    <?php
+    $item = (isset($item)) ? $item : null;
+    $file = (isset($file)) ? $file : null;
+    $collection = (isset($collection)) ? $collection : null;
+    ?>
+
+    <!-- FB Open Graph stuff: see also robots.txt -->
+    <meta property="og:title" content="<?php echo trim(implode(' | ', $titleParts)); ?>" />
+    <meta property="og:image" content="<?php echo ob_seo_pageimg($item, $file, $collection);?>" />
+    <meta property="og:site_name" content="<?php echo trim(option('site_title'));?>" />
+    <meta property="og:description" content="<?php echo ob_seo_pagedesc($item, $file, $collection);?>" />
+
+    <!-- Twitter Card stuff: see also robots.txt -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo trim(implode(' | ', $titleParts)); ?>">
+    <meta name="twitter:description" content="<?php echo ob_seo_pagedesc($item, $file, $collection);?>">
+    <meta name="twitter:image" content="<?php echo ob_seo_pageimg($item, $file, $collection);?>">
 
     <!-- Plugin Stuff -->
     <?php fire_plugin_hook('public_head', array('view' => $this)); ?>
@@ -31,7 +51,7 @@
     <!-- Stylesheets -->
     <?php
     queue_css_file('normalize');
-    queue_css_file('style');
+    queue_css_file('default');
     queue_css_file('custom');
     queue_css_file('mmenu', 'all', false, 'javascripts/mmenu');
     if ($typekit_id = trim(get_theme_option('typekit'))) {
@@ -65,7 +85,7 @@
         </div>
 
         <!-- Header Nav -->
-        <div id="nav-container" class="top">
+        <div id="nav-container" class="top <?php echo get_theme_option('always_show_menu') ? 'always-show-menu' : 'sometimes-show-menu';?>">
             <nav id="top-nav" role="navigation">
                 <?php echo public_nav_main(); ?>
                 <div class="menu-icons">

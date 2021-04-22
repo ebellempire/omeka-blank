@@ -1,6 +1,6 @@
 <?php
 $title = metadata('item', 'display_title');
-echo head(array('title' => $title, 'bodyclass' => 'items show'));
+echo head(array('title' => $title, 'bodyclass' => 'items show','item'=>$item));
 ?>
 
 <!-- Title -->
@@ -36,19 +36,13 @@ echo head(array('title' => $title, 'bodyclass' => 'items show'));
 </div>
 
 <!-- Citation -->
-<div id="citation-information">
-    <?php echo ob_citation($item);?>
-</div>
+<?php echo ob_citation($item);?>
 
 <!-- Tags -->
 <?php echo ob_tags($item);?>
 
 <!-- All Metadata -->
 <?php echo ob_all_metadata($item, get_theme_option('items_full_record'));?>
-
-
-<!-- Output formats -->
-<?php echo ob_output_formats($item);?>
 
 <!-- Pagination -->
 <?php echo ob_item_pagination($item);?>
