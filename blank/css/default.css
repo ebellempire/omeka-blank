@@ -51,6 +51,10 @@
   display: block;
   padding: 0;
 }
+.pswp__caption__center {
+  text-align: center !important;
+  max-width: 600px !important;
+}
 
 /* Search toggle */
 header .search-container input#query {

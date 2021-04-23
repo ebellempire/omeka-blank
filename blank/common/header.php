@@ -45,6 +45,11 @@
     <meta name="twitter:description" content="<?php echo ob_seo_pagedesc($item, $file, $collection);?>">
     <meta name="twitter:image" content="<?php echo ob_seo_pageimg($item, $file, $collection);?>">
 
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo img('apple-touch-icon.png', 'images/favicon');?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo img('favicon-32x32.png', 'images/favicon');?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?php echo img('favicon-16x16.png', 'images/favicon');?>">
+
     <!-- Plugin Stuff -->
     <?php fire_plugin_hook('public_head', array('view' => $this)); ?>
 
@@ -57,13 +62,24 @@
     if ($typekit_id = trim(get_theme_option('typekit'))) {
         queue_css_url('https://use.typekit.net/'.$typekit_id.'.css');
     }
+    if ($item && metadata($item, 'has thumbnail')) {
+        queue_css_file('photoswipe', 'all', false, 'javascripts/photoswipe');
+        queue_css_file('default-skin', 'all', false, 'javascripts/photoswipe/default-skin');
+    }
     echo head_css();
     ?>
 
     <!-- JavaScripts -->
-    <?php queue_js_file('globals'); ?>
-    <?php queue_js_file('mmenu', 'javascripts/mmenu'); ?>
-    <?php echo head_js(); ?>
+    <?php
+    queue_js_file('mmenu', 'javascripts/mmenu');
+    queue_js_file('globals');
+    if ($item && metadata($item, 'has thumbnail')) {
+        queue_js_file('photoswipe.min', 'javascripts/photoswipe');
+        queue_js_file('photoswipe-ui-default.min', 'javascripts/photoswipe');
+        queue_js_file('item-pswp');
+    }
+    echo head_js();
+    ?>
 </head>
 
 <?php echo body_tag(array('id' => @$bodyid, 'class' => @$bodyclass)); ?>

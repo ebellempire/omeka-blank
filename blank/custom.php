@@ -29,7 +29,7 @@ function ob_isVideo($mime=null)
 
 // return img markup
 // used by: ob_item_files()
-// data-attributes on container link can be used for lightbox-style image viewer
+// data-attributes on container link are used for image viewer (see: javascripts/item-pswp.js)
 // includes alt tags based on file metadata
 function ob_img_markup($file, $size='fullsize', $index=0, $html=null)
 {
@@ -39,7 +39,7 @@ function ob_img_markup($file, $size='fullsize', $index=0, $html=null)
         $record_url = '/files/show/'.$file->id;
 
         $html .= '<div class="item-file image '.$size.'" id="image-'.$index.'">';
-        $html .= '<a href="'.$record_url.'" data-size="" data-height="" data-width="" data-original="'.$file->getWebPath('original').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
+        $html .= '<a href="'.$record_url.'" data-height="" data-width="" data-fullsize="'.$file->getWebPath('fullsize').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'" data-view-label="'.__('View File Details').'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
         $html .= '</div>';
     }
     return $html;
@@ -461,7 +461,7 @@ function ob_secondary_nav($type='items', $collection_id=null)
 // return item type selection dropdown
 // @todo: this is going to return some empty results if other query params are set
 // i.e. the totals only represent all items of a type, not items of a type within a subset of items being queried
-function ob_item_type_selection($options=null, $html=null)
+function ob_item_type_selection($showcount = false, $options=null, $html=null)
 {
     $totalRecords = intval(total_records('Item'));
     $withItemType = 0;
@@ -469,10 +469,12 @@ function ob_item_type_selection($options=null, $html=null)
     foreach ($types as $type) {
         if ($type->totalItems()) {
             $withItemType += $type->totalItems();
-            $options .= '<option value="'.$type->id.'">'.$type->name.' ('.$type->totalItems().')</option>';
+            $count = $showcount ? '('.$type->totalItems().')' : null;
+            $options .= '<option value="'.$type->id.'">'.$type->name.' '.$count.'</option>';
         }
     }
-    $options .= '<option value="0">'.__("Other").' ('.($totalRecords - $withItemType).')</option>';
+    $count = $showcount ? '('.($totalRecords - $withItemType).')' : null;
+    $options .= '<option value="0">'.__("Other").' '.$count.'</option>';
     $html .= '<div id="item-type-selection">';
     $html .= '<select onchange="item_type_filter();">';
     $html .= '<option>'.__('Filter by Item Type').'</option>'.$options;
@@ -587,13 +589,16 @@ function ob_item_description($item=null, $snippet=false, $length=250, $html=null
 function ob_item_image($item = null, $html = null)
 {
     if ($item) {
-        if (metadata($item, 'has files')) {
-            // default behavior if there is a file
+        if (metadata($item, 'has thumbnail')) {
+            // if there is a thumbnail
             $html .= item_image();
+        } elseif (metadata($item, 'has files')) {
+            // if there is a file but no thumbnail (e.g. audio)
+            $html .= item_image(); // e.g. images/fallback-audio.png
         } else {
-            // customize when there is no file and a thumbnail is desired
+            // if there is no file and a thumbnail is desired
+            // does it have an assigned type?
             $type = get_record_by_id('ItemType', $item->item_type_id);
-
             if ($type && isset($type['name'])) {
                 $typename = $type['name'];
 
@@ -632,6 +637,8 @@ function ob_item_image($item = null, $html = null)
                 }
 
                 $html .= '<img class="placeholder-image" src="'.$src.'"/>';
+            } else {
+                // no item type and no file?
             }
         }
     }
@@ -911,9 +918,8 @@ function ob_mmenu_markup($html=null)
 // returns hidden markup for image viewer
 function ob_photoswipe_markup($item=null, $html=null)
 {
-    if ($item && metadata($item, 'has files')) {
-        $html.='<div style="display:none;visibility:hidden;">
-    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    if ($item && metadata($item, 'has thumbnail')) {
+        $html.='<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="pswp__bg"></div>
         <div class="pswp__scroll-wrap">
             <div class="pswp__container">
@@ -948,7 +954,7 @@ function ob_photoswipe_markup($item=null, $html=null)
                 </div>
             </div>
         </div>
-    </div></div>';
+    </div>';
     }
 
     return $html;

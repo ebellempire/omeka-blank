@@ -1,6 +1,5 @@
-// ITEM TYPE FILTER
+// ITEM TYPE FILTER (on change select)
 const item_type_filter = (e) => {
-  //  (on change)
   var current_url = window.location;
   var new_url = null;
   var select = document.querySelector("#item-type-selection select");
@@ -10,21 +9,22 @@ const item_type_filter = (e) => {
     let new_type_id = select.value;
     let current_type_id = params.get("type");
     if (current_type_id) {
-      // if type is already set, replace type
+      // if type param is already set, replace type param
       new_url = current_url.href.replace(
         "type=" + current_type_id,
         "type=" + new_type_id
       );
     } else {
-      // otherwise, add type
-      // if there are other params (i.e. ?)
+      // otherwise, add new type param
       if (current_url.href.includes("?")) {
+        // add to existing params
         new_url = current_url.href + "&type=" + new_type_id;
       } else {
+        // set the sole param
         new_url = current_url.href + "?type=" + new_type_id;
       }
     }
-    console.log(new_url);
+    window.location.assign(new_url);
   }
 };
 document.addEventListener("DOMContentLoaded", (event) => {
