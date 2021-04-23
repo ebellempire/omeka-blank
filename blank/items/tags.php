@@ -9,6 +9,18 @@ echo head(array('title' => $pageTitle, 'bodyclass' => 'items tags'));
 
 <?php echo ob_secondary_nav(); ?>
 
-<?php echo tag_cloud($tags, 'items/browse'); ?>
+<div id="primary-content">
+    <?php
+    if (get_theme_option('tag_images')==1) {
+        echo '<div id="tag-image-gallery">';
+        foreach ($tags as $tag) {
+            echo ob_tag_image($tag->name);
+        }
+        echo '</div>';
+    } else {
+        echo tag_cloud($tags, 'items/browse');
+    }
+    ?>
+</div>
 
 <?php echo foot(); ?>

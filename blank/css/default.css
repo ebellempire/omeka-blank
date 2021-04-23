@@ -251,3 +251,34 @@ article#content > nav {
   justify-content: space-between;
   padding: 0;
 }
+
+/* Image Tags */
+
+#tag-image-gallery .tag-title {
+  background: rgba(0, 0, 0, 0.75);
+  text-align: center;
+  display: ;
+  padding: 5px;
+  color: #fff;
+}
+
+#tag-image-gallery {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+#tag-image-gallery .tag-image-container {
+  padding: 5px;
+}
+
+#tag-image-gallery .tag-image {
+  display: block;
+  padding-top: 150px;
+  background-color: #000;
+  width: 200px;
+  background-position: center;
+  background-size: cover;
+  text-decoration: none;
+}
