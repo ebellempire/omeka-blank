@@ -646,7 +646,9 @@ function ob_item_image($item = null, $html = null)
 }
 
 // returns item metadata card for browse views, etc
-function ob_item_card($item=null, $view=null, $html=null)
+// set $append_plugin true to enable fire_plugin_hook
+// some plugins append code that disrupts certain types of layout (grid, flex, etc)
+function ob_item_card($item=null, $view=null, $append_plugin=false, $html=null)
 {
     if ($item) {
         $html .= '<div class="item hentry">';
@@ -668,7 +670,7 @@ function ob_item_card($item=null, $view=null, $html=null)
         }
 
         $html .= '</div>';
-        if ($view) {
+        if ($append_plugin && $view) {
             fire_plugin_hook('public_items_browse_each', array('view' => $view, 'item' => $item));
         }
         $html .= '</div>';
@@ -839,6 +841,11 @@ function ob_svg_tiktok_icon($size=30)
 function ob_svg_snapchat_icon($size=30)
 {
     return "<span class='icon snapchat'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Snapchat')."</title><path d='M496 347.21a190.31 190.31 0 01-32.79-5.31c-27.28-6.63-54.84-24.26-68.12-52.43-6.9-14.63-2.64-18.59 11.86-24 14.18-5.27 29.8-7.72 36.86-23 5.89-12.76 1.13-27.76-10.41-35.49-15.71-10.53-30.35-.21-46.62 2.07 3.73-46.66 8.66-88.57-22.67-127.73C338.14 48.86 297.34 32 256.29 32s-81.86 16.86-107.81 49.33c-31.38 39.26-26.4 81.18-22.67 127.92-16.32-2.25-30.81-12.79-46.63-2.18-14.72 9.85-17 29.76-5.44 43s31.64 9.5 43.45 20.6c6.49 6.09 3.49 12.61-.35 20.14-14.48 28.4-39.26 45.74-69.84 51.56-4 .76-22.31 2.87-31 3.65 0 9.28.52 16.78 1.63 21.73 2.94 13.06 12.32 23.58 23.69 30.1 11.18 6.4 35.48 6.43 41.68 15.51 3 4.48 1.76 12.28 5.33 17.38a23.8 23.8 0 0015.37 9.75c18.61 3.61 37.32-7.2 56.42-2.1 14.85 3.95 26.52 15.87 39.26 24 15.51 9.85 32.34 16.42 50.83 17.49 38.1 2.21 59.93-18.91 90.58-36.42 19.5-11.14 38.15-3.86 58.88-2.68 20.1 1.15 23.53-9.25 29.62-24.88a27.37 27.37 0 001.54-4.85 10.52 10.52 0 002.28-1.47c2-1.57 10.55-2.34 12.76-2.86 10.28-2.44 20.34-5.15 29.17-11.2 11.31-7.76 17.65-18.5 19.58-32.64a93.73 93.73 0 001.38-15.67zM208 128c8.84 0 16 10.74 16 24s-7.16 24-16 24-16-10.74-16-24 7.16-24 16-24zm103.62 77.7c-15.25 15-35 23.3-55.62 23.3a78.37 78.37 0 01-55.66-23.34 8 8 0 0111.32-11.32A62.46 62.46 0 00256 213c16.39 0 32.15-6.64 44.39-18.7a8 8 0 0111.23 11.4zM304 176c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24z'/></svg></span>";
+}
+
+function ob_svg_info_icon($size=30)
+{
+    return "<span class='icon info-circle'><svg height='".$size."' width='".$size."' xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><title>".__('Information')."</title><path d='M248 64C146.39 64 64 146.39 64 248s82.39 184 184 184 184-82.39 184-184S349.61 64 248 64z' fill='none' stroke='currentColor' stroke-miterlimit='10' stroke-width='32'/><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M220 220h32v116'/><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-miterlimit='10' stroke-width='32' d='M208 340h88'/><path d='M248 130a26 26 0 1026 26 26 26 0 00-26-26z'/></svg></span>";
 }
 
 // returns markup for configured social media icons
@@ -1038,5 +1045,45 @@ function ob_tag_image($tagname=null, $html=null)
     $html .= '<div class="tag-title">'.$tagname.'</div>';
     $html .='</a>';
     $html .= '</div>';
+    return $html;
+}
+
+// returns markup and data for homepage gallery
+// uses gallery tag if set, otherwise uses featured items
+// slides are stacked using z-index and absolute positioning
+// data-slide-index determines top layer (1 is visible by default, then JS takes over)
+function ob_homepage_gallery_markup($num=5, $items_array=array(), $index=0, $dots=null, $slides=null, $html=null)
+{
+    if ((get_theme_option('gallery_on') == 1) && current_url()=='/') {
+        if ($tag = get_theme_option('gallery_tag')) {
+            if ($items = get_records('Item', array('tags'=>$tag,'has thumbnail'=>true), $num)) {
+                $items = $items; // ewww, do this better
+            } else {
+                $items = get_records('Item', array('featured'=>true,'has thumbnail'=>true), $num);
+            }
+        } else {
+            $items = get_records('Item', array('featured'=>true,'has thumbnail'=>true), $num);
+        }
+        foreach ($items as $item) {
+            $index++;
+            if ($itemimg=record_image($item, 'fullsize')) {
+                preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $itemimg, $result);
+                $img=array_pop($result);
+            }
+            $slides .= '<div data-active="'.($index==1 ? 1 : 0).'" data-slide-id="'.$index.'" class="homepage-gallery-image-container" style="background-image:url('.$img.')">';
+            $slides .= '<figcaption class="homepage-gallery-caption"><a href="/items/show/'.$item->id.'">'.metadata($item, array('Dublin Core','Title')).'</a></figcaption>';
+            $slides .= '</div>';
+
+            $dots .= '<a href="javascript:void(0)" class="dot" data-dot-id="'.$index.'" data-dot-active="'.($index==1 ? 1 : 0).'"></a>';
+        }
+        if ($slides) {
+            $html .= '<figure id="homepage-gallery" aria-hidden="true" data-timing="'.get_theme_option('gallery_timing').'" data-show-details="'.get_theme_option('gallery_show_details').'" data-autoplay="'.get_theme_option('gallery_autoplay').'">';
+            $html .= $slides;
+            $html .= '</figure>';
+        }
+        if (true) {
+            $html .= '<div id="slide-dots">'.$dots.'</div>';
+        }
+    }
     return $html;
 }

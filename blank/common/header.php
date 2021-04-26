@@ -73,10 +73,13 @@
     <?php
     queue_js_file('mmenu', 'javascripts/mmenu');
     queue_js_file('globals');
+    if (current_url()=="/") {
+        queue_js_file('home');
+    }
     if ($item && metadata($item, 'has thumbnail')) {
         queue_js_file('photoswipe.min', 'javascripts/photoswipe');
         queue_js_file('photoswipe-ui-default.min', 'javascripts/photoswipe');
-        queue_js_file('item-pswp');
+        queue_js_file('item');
     }
     echo head_js();
     ?>
@@ -87,7 +90,7 @@
 <?php fire_plugin_hook('public_body', array('view' => $this)); ?>
 <div id="wrap">
 
-    <header role="banner" style="background-image:url(<?php echo ($bg = get_theme_option('site_banner_image')) ? '/files/theme_uploads/'.$bg : '';?>);">
+    <header role="banner" style="background-image:url(<?php echo ($bg = get_theme_option('site_banner_image')) ? '/files/theme_uploads/'.$bg : '';?>);" class="<?php echo ((get_theme_option('gallery_on') == 1) && current_url()=='/') ? 'interactive' : 'static';?>">
 
         <?php fire_plugin_hook('public_header', array('view' => $this)); ?>
 
@@ -106,12 +109,12 @@
                 <?php echo public_nav_main(); ?>
                 <div class="menu-icons">
                     <a href="/items/search" id="search-button"><?php echo ob_svg_search_icon();?></a>
-                    <a href="/#" id="menu-button"><?php echo ob_svg_hamburger_icon();?></a>
+                    <a href="javascript:void(0)" id="menu-button"><?php echo ob_svg_hamburger_icon();?></a>
                 </div>
             </nav>
         </div>
         <?php echo ob_search_container();?>
-
+        <?php echo ob_homepage_gallery_markup();?>
     </header>
 
     <article id="content" role="main">
