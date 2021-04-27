@@ -37,9 +37,10 @@ function ob_img_markup($file, $size='fullsize', $index=0, $html=null)
         $title = ob_dublin($file, 'Title');
         $description = ob_dublin($file, 'Description');
         $record_url = '/files/show/'.$file->id;
+        $readFile=getimagesize($file->getWebPath('fullsize'));
 
         $html .= '<div class="item-file image '.$size.'" id="image-'.$index.'">';
-        $html .= '<a href="'.$record_url.'" data-height="" data-width="" data-fullsize="'.$file->getWebPath('fullsize').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'" data-view-label="'.__('View File Details').'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
+        $html .= '<a href="'.$record_url.'" data-height="'.$readFile[0].'" data-width="'.$readFile[1].'" data-fullsize="'.$file->getWebPath('fullsize').'" data-title="'.strip_tags($title).'" data-description="'.strip_tags($description).'" data-id="'.$file->id.'" data-view-label="'.__('View File Details').'"><img alt="'.strip_tags(ob_dublin($file, 'Description', array('Title'))).'" src="'.$url.'"/></a>';
         $html .= '</div>';
     }
     return $html;
@@ -1082,7 +1083,7 @@ function ob_homepage_gallery_markup($num=5, $items_array=array(), $index=0, $dot
             $html .= '</figure>';
         }
         if (true) {
-            $html .= '<div id="slide-dots">'.$dots.'</div>';
+            $html .= '<div aria-hidden="true" id="slide-dots">'.$dots.'</div>';
         }
     }
     return $html;

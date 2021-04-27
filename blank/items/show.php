@@ -15,7 +15,6 @@ echo head(array('title' => $title, 'bodyclass' => 'items show','item'=>$item));
     <div class="main-text">
         <?php echo ob_item_description($item);?>
     </div>
-
     <!-- Files -->
     <?php echo ob_item_files($item, true);?>
 

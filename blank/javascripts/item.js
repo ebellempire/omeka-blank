@@ -1,25 +1,16 @@
 document.addEventListener("DOMContentLoaded", (e) => {
-  // get image dimensions // @todo: async?
-  function getImgSize(src) {
-    var img = new Image();
-    img.src = src;
-    var height = img.height;
-    var width = img.width;
-    x = jQuery(img).ready(function () {
-      return { width: img.width, height: img.height };
-    });
-    return [x[0]["width"], x[0]["height"]];
-  }
   // build items array
   const image_links = document.querySelectorAll(".item-file.image a");
   var items = [];
   var no_dimensions = [];
   image_links.forEach((link, i) => {
+    // dimensions
     var src = link.getAttribute("data-fullsize");
-    var size = getImgSize(src);
-    link.setAttribute("data-width", size[0]);
-    link.setAttribute("data-height", size[1]);
-    link.setAttribute("data-index", i);
+    var size = [
+      link.getAttribute("data-height"),
+      link.getAttribute("data-width"),
+    ];
+    // caption
     var caption = [];
     if ((title = link.getAttribute("data-title"))) {
       caption.push(title);
@@ -35,7 +26,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         "</a>",
     ]);
     // add to items if dimensions are known
-    if (size[0] && size[1]) {
+    if (size[0] > 0 && size[1] > 0) {
       items.push({
         src: src,
         w: size[0],
@@ -74,7 +65,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
         );
         gallery.init();
       }
-      // if no dimensions, fallback = direct link to file record page
+      // if no dimensions (or no JS), fallback = direct link to file record page
     });
   });
 });
