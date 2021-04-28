@@ -937,8 +937,8 @@ function ob_search_container($html=null)
 // returns hidden markup for side menu
 function ob_mmenu_markup($html=null)
 {
-    $html .= '<div style="display:none;visibility:hidden;">';
-    $html .= '<div id="mmenu-contents" data-title="'.__('Menu').'" data-theme="'.($theme = get_theme_option('menu_theme') ? $theme : 'light').'">';
+    $html .= '<div aria-hidden="true">';
+    $html .= '<div id="mmenu-contents" data-sliding-submenus="'.get_theme_option('menu_sliding').'" data-title="'.__('Menu').'" data-theme="'.get_theme_option('menu_theme').'">';
     $html .= public_nav_main();
     $html .= '</div>';
     $html .='</div>';

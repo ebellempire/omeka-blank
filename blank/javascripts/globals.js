@@ -67,10 +67,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const nav = document.querySelector("#mmenu-contents");
   const theme = nav.getAttribute("data-theme");
   const title = nav.getAttribute("data-title");
+  const sliding_option = nav.getAttribute("data-sliding-submenus");
+  const slidingSubmenus = sliding_option > 0 ? true : false;
   const menu = new MmenuLight(nav);
   const navigator = menu.navigation({
     theme: theme,
-    slidingSubmenus: false,
+    slidingSubmenus: slidingSubmenus,
     title: title,
   });
   const drawer = menu.offcanvas({ position: "right" });
