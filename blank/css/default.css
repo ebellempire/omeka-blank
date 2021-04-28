@@ -197,6 +197,7 @@ footer > div {
 
 /* Homepage gallery */
 header.interactive {
+  padding-bottom: 400px;
   position: relative;
 }
 

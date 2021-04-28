@@ -156,7 +156,7 @@ function ob_item_label($type="singular")
 // not recommended if you plan to internationalize the text labels as that process requires static strings
 function ob_featured_item_label($type="singular")
 {
-    if ($type="plural") {
+    if ($type !== "singular") {
         $label = get_theme_option('featured_label_p') ? get_theme_option('featured_label_p') : __('Featured Items');
     } else {
         $label = get_theme_option('featured_label_s') ? get_theme_option('featured_label_s') : __('Featured Item');
@@ -237,7 +237,7 @@ function ob_featured_item_block($showlink=true, $html=null)
 {
     if (get_theme_option('display_featured_item') !== '0') {
         $html .= '<div id="featured-item">';
-        $html .= '<h2>'.ob_featured_item_label('singular').'</h2>';
+        $html .= '<h2>'.ob_featured_item_label().'</h2>';
         $html .= random_featured_items(1, true);
         $html .= $showlink ? '<a href="/items/browse/?featured=1">'.__('View All %s', ob_featured_item_label('plural')).'</a>' : null;
         $html .= '</div>';
@@ -246,14 +246,28 @@ function ob_featured_item_block($showlink=true, $html=null)
     return $html;
 }
 
+// return a single featured item using the preferred label
+function ob_featured_collection_block($showlink=true, $html=null)
+{
+    if (get_theme_option('display_featured_collection') !== '0') {
+        $html .= '<div id="featured-collection">';
+        $html .= '<h2>'.__('Featured Collection').'</h2>';
+        $html .= random_featured_collection();
+        $html .= $showlink ? '<a href="/collections/browse/?featured=1">'.__('View All Featured Collections').'</a>' : null;
+        $html .= '</div>';
+    }
+
+    return $html;
+}
+
 // return a single recent item using the preferred label
 // @todo: add req. theme options!!!
-function ob_recent_item_block($showlink=true, $html=null)
+function ob_recent_items_block($showlink=true, $html=null)
 {
-    if (get_theme_option('display_recent_item') !== '0') {
+    if ($num = get_theme_option('homepage_recent_items')) {
         $html .= '<div id="recent-item">';
-        $html .= '<h2>'.__('Recently Added %s', ob_item_label('singular')).'</h2>';
-        $html .= recent_items(1, true);
+        $html .= '<h2>'.__('Recently Added %s', ob_item_label('plural')).'</h2>';
+        $html .= recent_items($num, true);
         $html .= $showlink ? '<a href="/items/browse/">'.__('View All %s', ob_item_label('plural')).'</a>' : null;
         $html .= '</div>';
     }
@@ -284,6 +298,12 @@ function ob_cta_block($html = null)
 // return custom homepage text block #1
 function ob_homepage_text_block_1($heading=null, $img=null, $html = null)
 {
+    if (!$heading) {
+        $heading = get_theme_option('homepage_block_1_heading');
+    }
+    if (!$img) {
+        $img = get_theme_option('homepage_block_1_img');
+    }
     if (get_theme_option('homepage_block_1_text')) {
         $html .= '<div id="home-text">';
         $html .= $heading ? '<h2>'.html_escape(trim($heading)).'</h2>' : null;
@@ -298,6 +318,12 @@ function ob_homepage_text_block_1($heading=null, $img=null, $html = null)
 // return custom homepage text block #2
 function ob_homepage_text_block_2($heading=null, $img = null, $html = null)
 {
+    if (!$heading) {
+        $heading = get_theme_option('homepage_block_2_heading');
+    }
+    if (!$img) {
+        $img = get_theme_option('homepage_block_2_img');
+    }
     if (get_theme_option('homepage_block_2_text')) {
         $html .= '<div id="home-text">';
         $html .= $heading ? '<h2>'.html_escape(trim($heading)).'</h2>' : null;
@@ -430,10 +456,13 @@ function ob_secondary_nav($type='items', $collection_id=null)
             'label' =>__('All Collections'),
             'uri' => url('collections/browse/'),
             ));
-        $navArray[]  = array(
-            'label' =>__('Featured Collections'),
-            'uri' => url('collections/browse?featured=1'),
+        if (get_theme_option('featured_secondary_nav') == 1) {
+            $navArray[]  = array(
+                'label' =>__('Featured Collections'),
+                'uri' => url('collections/browse?featured=1'),
             );
+        }
+
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     } elseif ($type == 'exhibits') {
         $navArray = array(
@@ -957,6 +986,18 @@ function ob_photoswipe_markup($item=null, $html=null)
         </div>
     </div>';
     }
+
+    return $html;
+}
+
+function ob_contact_info($html=null)
+{
+    $site_orgname = trim(get_theme_option("site_orgname"));
+    $site_address = trim(get_theme_option("site_address"));
+    $site_phone = trim(get_theme_option("site_phone"));
+    $site_email = trim(get_theme_option("site_email"));
+    $html .= ($site_orgname || $site_address) ? "<p class='site-info address'>".implode(' | ', array($site_orgname,$site_address))."</p>" : null;
+    $html .= ($site_phone || $site_email) ? "<p class='site-info contact'>".implode(' | ', array($site_phone,'<a href="mailto:'.$site_email.'">'.$site_email.'</a>'))."</p>" : null;
 
     return $html;
 }

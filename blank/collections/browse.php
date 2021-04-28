@@ -14,9 +14,15 @@ echo head(array('title' => $pageTitle, 'bodyclass' => 'collections browse'));
 <?php echo ob_sort_links('collections');?>
 
 <div id="primary-content">
-    <?php foreach (loop('collections') as $collection) {
-    echo ob_collection_card($collection, get_view());
-} ?>
+    <?php
+    if ($total_results) {
+        foreach (loop('collections') as $collection) {
+            echo ob_collection_card($collection, get_view());
+        }
+    } else {
+        echo __('There are no Collections matching your request.');
+    }
+   ?>
 </div>
 
 <?php echo pagination_links(); ?>

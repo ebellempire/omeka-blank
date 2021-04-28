@@ -27,9 +27,6 @@ echo head(array('title' => $title, 'bodyclass' => 'items show','item'=>$item));
     <!-- Item Collection -->
     <?php echo ob_item_collection($item);?>
 
-    <!-- Call to Action -->
-    <?php echo ob_cta_block();?>
-
     <!-- Plugin -->
     <?php fire_plugin_hook('public_items_show', array('view' => $this, 'item' => $item)); ?>
 </div>
