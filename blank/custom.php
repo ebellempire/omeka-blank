@@ -386,51 +386,44 @@ function ob_output_formats($item=null, $html=null)
 // primarily for items/browse but can also be used for similar menus elsewhere
 function ob_secondary_nav($type='items', $collection_id=null)
 {
-    if ($type == 'items') {
+    if ($type == 'items' || $type == 'search') {
         $navArray = array(array(
             'label' =>__('All %s', ob_item_label('plural')),
             'uri' => url('items/browse'),
         ));
-
         if (get_theme_option('featured_secondary_nav') == 1) {
             $navArray[] = array(
                  'label' => ob_featured_item_label('plural'),
                  'uri' => url('items/browse?featured=1'));
         }
-
-
         if (total_records('Tag')) {
             $navArray[] = array(
                 'label' => __('%s Tags', ob_item_label()),
                 'uri' => url('items/tags'));
         }
-
         if (plugin_is_active("Geolocation")) {
             $navArray[] = array(
                 'label' => __('%s Map', ob_item_label()),
                 'uri' => url('items/map'));
         }
-
         $navArray[] = array(
             'label' => __('%s Search', ob_item_label()),
             'uri' => url('items/search'));
-
-        $navArray[] = array(
-            'label' => __('Site Search'),
-            'uri' => url('search'));
-
+        if ($type=="search") {
+            $navArray[] = array(
+                'label' => __('Site Search'),
+                'uri' => url('search'));
+        }
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     } elseif (($type == 'collection') && (is_int($collection_id))) {
         $navArray = array(array(
             'label' =>__('Recent %s', ob_item_label('plural')),
             'uri' => url('collections/show/'.$collection_id),
             ));
-
         $navArray[]  = array(
             'label' =>__('All %s', ob_item_label('plural')),
             'uri' => url('items/browse?collection='.$collection_id),
             );
-
         return '<nav class="items-nav navigation secondary-nav">'.public_nav_items($navArray).'</nav>';
     } elseif ($type == 'collections') {
         $navArray = array(array(

@@ -9,7 +9,7 @@ $searchRecordTypes = get_search_record_types();
 
 <?php echo search_filters(); ?>
 
-<?php echo ob_secondary_nav(); ?>
+<?php echo ob_secondary_nav('search'); ?>
 
 <?php echo ob_sort_links('search');?>
 
