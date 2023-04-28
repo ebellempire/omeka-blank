@@ -1,3 +1,17 @@
+:root {
+  --facebook: #305891;
+  --twitter: #2ca8d2;
+  --instagram: #000;
+  --instagram-alt: #405DE6;
+  --youtube: #de2826;
+  --email: #0078d7;
+  --tiktok: #ff0050;
+  --snapchat: #FFFC00;
+  --tumblr: #34526f;
+  --pinterest: #E60023;
+  --mastodon: #595aff;
+}
+
 /* Skip Nav */
 #skipnav {
   border: 0;
@@ -296,10 +310,7 @@ article#content {
   margin: 0 auto;
   background-color: #fafafa;
 }
-article#content > div,
-article#content > nav {
-  padding: 1em;
-}
+
 #secondary {
   background-color: #eaeaea;
   padding: 1em;
@@ -346,35 +357,4 @@ article#content > nav {
   list-style-type: none;
   justify-content: space-between;
   padding: 0;
-}
-
-/* Image Tags */
-
-#tag-image-gallery .tag-title {
-  background: rgba(0, 0, 0, 0.75);
-  text-align: center;
-  display: ;
-  padding: 5px;
-  color: #fff;
-}
-
-#tag-image-gallery {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-#tag-image-gallery .tag-image-container {
-  padding: 5px;
-}
-
-#tag-image-gallery .tag-image {
-  display: block;
-  padding-top: 150px;
-  background-color: #000;
-  width: 200px;
-  background-position: center;
-  background-size: cover;
-  text-decoration: none;
 }
