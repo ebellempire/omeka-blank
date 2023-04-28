@@ -90,7 +90,7 @@
 <?php fire_plugin_hook('public_body', array('view' => $this)); ?>
 <div id="wrap">
 
-    <header role="banner" style="background-image:url(<?php echo ($bg = get_theme_option('site_banner_image')) ? '/files/theme_uploads/'.$bg : '';?>);" class="<?php echo ((get_theme_option('gallery_on') == 1) && current_url()=='/') ? 'interactive' : 'static';?>">
+    <header role="banner" style="background-image:url(<?php echo ($bg = get_theme_option('site_banner_image')) ? '/files/theme_uploads/'.$bg : '';?>);">
 
         <?php fire_plugin_hook('public_header', array('view' => $this)); ?>
 
@@ -114,7 +114,6 @@
             </nav>
         </div>
         <?php echo ob_search_container();?>
-        <?php echo ob_homepage_gallery_markup();?>
     </header>
 
     <article id="content" role="main">

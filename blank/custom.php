@@ -1096,12 +1096,12 @@ function ob_homepage_gallery_markup($num=5, $items_array=array(), $index=0, $dot
             $dots .= '<a href="javascript:void(0)" class="dot" data-dot-id="'.$index.'" data-dot-active="'.($index==1 ? 1 : 0).'"></a>';
         }
         if ($slides) {
-            $html .= '<figure id="homepage-gallery" aria-hidden="true" data-timing="'.get_theme_option('gallery_timing').'" data-show-details="'.get_theme_option('gallery_show_details').'" data-autoplay="'.get_theme_option('gallery_autoplay').'">';
-            $html .= $slides;
-            $html .= '</figure>';
-        }
-        if (true) {
-            $html .= '<div aria-hidden="true" id="slide-dots">'.$dots.'</div>';
+            $html .= '<div id="gallery-container">';
+                $html .= '<figure id="homepage-gallery" aria-hidden="true" data-timing="'.get_theme_option('gallery_timing').'" data-show-details="'.get_theme_option('gallery_show_details').'" data-autoplay="'.get_theme_option('gallery_autoplay').'">';
+                $html .= $slides;
+                $html .= '</figure>';
+                $html .= '<div aria-hidden="true" id="slide-dots">'.$dots.'</div>';
+            $html .= '</div>';
         }
     }
     return $html;

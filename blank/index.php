@@ -1,6 +1,8 @@
 <?php echo head(array('bodyid' => 'home')); ?>
 
 <div>
+    <!--  Gallery -->
+    <?php echo ob_homepage_gallery_markup();?>
     <!--  Featured Item -->
     <?php echo ob_featured_item_block();?>
     <!--  Featured Collection -->

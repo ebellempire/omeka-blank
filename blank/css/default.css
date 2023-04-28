@@ -209,18 +209,18 @@ footer > div {
 }
 
 /* Homepage gallery */
-header.interactive {
+#gallery-container {
   padding-bottom: 400px;
   position: relative;
 }
 
-header.interactive #nav-container,
-header.interactive #banner-container {
+#gallery-container #nav-container,
+#gallery-container #banner-container {
   position: inherit;
   z-index: 1;
 }
 
-header.interactive figure#homepage-gallery {
+#gallery-container figure#homepage-gallery {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -230,7 +230,7 @@ header.interactive figure#homepage-gallery {
   height: 100%;
   width: 100%;
 }
-header.interactive figure#homepage-gallery .homepage-gallery-caption {
+#gallery-container figure#homepage-gallery .homepage-gallery-caption {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -240,15 +240,15 @@ header.interactive figure#homepage-gallery .homepage-gallery-caption {
   background: rgba(0, 0, 0, 0.65);
   max-width: 55%;
 }
-header.interactive figure#homepage-gallery .homepage-gallery-caption a {
+#gallery-container figure#homepage-gallery .homepage-gallery-caption a {
   color: #fff;
   text-decoration: none;
 }
-header.interactive figure#homepage-gallery .homepage-gallery-caption a:hover {
+#gallery-container figure#homepage-gallery .homepage-gallery-caption a:hover {
   text-decoration: underline;
 }
 
-header.interactive figure#homepage-gallery .homepage-gallery-image-container {
+#gallery-container figure#homepage-gallery .homepage-gallery-image-container {
   height: 100%;
   width: 100%;
   background-position: center;
@@ -258,19 +258,16 @@ header.interactive figure#homepage-gallery .homepage-gallery-image-container {
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
-header.interactive
-  figure#homepage-gallery
-  .homepage-gallery-image-container[data-active="1"] {
+#gallery-container figure#homepage-gallery .homepage-gallery-image-container[data-active="1"] {
   z-index: 0;
   opacity: 1;
 }
 
-header.interactive
-  figure#homepage-gallery[data-show-details="0"]
+#gallery-container figure#homepage-gallery[data-show-details="0"]
   .homepage-gallery-caption {
   display: none;
 }
-header #slide-dots {
+#gallery-container #slide-dots {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -279,7 +276,7 @@ header #slide-dots {
   padding: 10px;
   left: 0;
 }
-header #slide-dots .dot {
+#gallery-container #slide-dots .dot {
   display: inline-block;
   border-radius: 50%;
   background-color: #fff;
@@ -289,7 +286,7 @@ header #slide-dots .dot {
   transition: all 0.5s ease-in-out;
 }
 
-header #slide-dots .dot[data-dot-active="1"] {
+#gallery-container #slide-dots .dot[data-dot-active="1"] {
   border-color: #000;
   background-color: #000;
 }
