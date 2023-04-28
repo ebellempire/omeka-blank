@@ -1,5 +1,8 @@
 <?php
-
+// Sprite icons
+function ob_sprite($icon){
+    return '<svg aria-hidden="true" class="sprite" viewBox="0 0 512 512"><use xlink:href="'.img('sprites.svg').'#'.$icon.'" /></svg>';
+}
 // test: is this a web-friendly image?
 // used by: ob_item_files()
 function ob_isImg($mime=null)

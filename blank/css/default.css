@@ -21,6 +21,19 @@
   color: #ff8000;
 }
 
+/* Icon Sprites */
+.sprite {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  transition: all linear 0.15s;
+  vertical-align: middle;
+}
+.button .sprite {
+  margin-right: 0.25em;
+}
+
+/* Text */
 .main-text {
   padding-bottom: 1em;
 }
