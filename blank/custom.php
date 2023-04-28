@@ -1067,25 +1067,6 @@ function ob_seo_pageimg($item=null, $file=null, $collection=null)
     return isset($img) ? $img : '';
 }
 
-// returns tags with corresponding images
-// make sure tag-images directory is accessible!
-// for now, you must manually add each image to the theme's images/tag-images directory
-// could be made automatic/dynamic but that might be a big server load and unpredictable
-function ob_tag_image($tagname=null, $html=null)
-{
-    $src = '/themes/'.Theme::getCurrentThemeName('public').'/images/tag-images/'.trim($tagname).'.jpg';
-
-    $html .= '<div class="tag-image-container">';
-    $html .= '<a class="tag-image" 
-    style="background-image:url('.$src.')" 
-    href="/items/browse/?tags='.urlencode($tagname).'" 
-    title="'.__('View %1s tagged %2s', ob_item_label('plural'), $tagname).'">';
-    $html .= '<div class="tag-title">'.$tagname.'</div>';
-    $html .='</a>';
-    $html .= '</div>';
-    return $html;
-}
-
 // returns markup and data for homepage gallery
 // uses gallery tag if set, otherwise uses featured items
 // slides are stacked using z-index and absolute positioning
